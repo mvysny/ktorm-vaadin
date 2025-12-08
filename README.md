@@ -1,6 +1,6 @@
 # ktorm-vaadin
 
-[KTORM](https://www.ktorm.org/) bindings for [Vaadin](https://vaadin.com/).
+[Ktorm](https://www.ktorm.org/) bindings for [Vaadin](https://vaadin.com/).
 
 TODO this will contain best practices on how to bind ktorm entities to Vaadin binder
 and DataProvider, but it's a work in progress.
