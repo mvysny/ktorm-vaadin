@@ -7,18 +7,12 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.test.expect
 
 class TransactionsTest : AbstractDbTest() {
-    @BeforeEach
-    fun prepareTestData() {
-        db {
-            ddl("create table foo (id int not null primary key auto_increment, name varchar(255))")
-        }
+    @BeforeEach fun prepareTestData() {
+        db { ddl("create table foo (id int not null primary key auto_increment, name varchar(255))") }
     }
 
-    @AfterEach
-    fun tearDownTestData() {
-        db {
-            ddl("drop table if exists foo")
-        }
+    @AfterEach fun tearDownTestData() {
+        db { ddl("drop table if exists foo") }
     }
 
     @Test
