@@ -7,6 +7,7 @@ import com.zaxxer.hikari.HikariDataSource
 import jakarta.servlet.ServletContextEvent
 import jakarta.servlet.ServletContextListener
 import jakarta.servlet.annotation.WebListener
+import org.flywaydb.core.Flyway
 import org.ktorm.database.Database
 import org.slf4j.LoggerFactory
 
@@ -28,6 +29,11 @@ class Bootstrap : ServletContextListener {
         }
         dataSource = HikariDataSource(cfg)
         ActiveKtorm.database = Database.connect(dataSource)
+        log.info("Creating tables")
+        val flyway: Flyway = Flyway.configure()
+            .dataSource(dataSource)
+            .load()
+        flyway.migrate()
         log.info("Started")
     }
 
