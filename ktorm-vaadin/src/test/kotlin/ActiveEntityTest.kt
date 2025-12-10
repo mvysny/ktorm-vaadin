@@ -32,6 +32,14 @@ class ActiveEntityTest : AbstractDbTest() {
         expect(true) { Person { name = "foo"; age = 5 }.isValid }
     }
 
+    @Test fun testHasId() {
+        val p = Person { name = "foo"; age = 10 }
+        expect(false) { p.hasId }
+        p.create()
+        expect(false) { p.id == null }
+        expect(true) { p.hasId }
+    }
+    
     @Test fun saveCreates() {
         val p = Person { name = "foo"; age = 10 }
         p.save()
