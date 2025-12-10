@@ -1,3 +1,4 @@
 .gradle
 kls_database.db
 build
+testapp/src/main/frontend/generated

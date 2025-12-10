@@ -1,0 +1,1 @@
+include("ktorm-vaadin", "testapp")

@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":jdbi-orm-vaadin"))
+    implementation(project(":ktorm-vaadin"))
 
     // Vaadin
     implementation(libs.vaadin.core)
