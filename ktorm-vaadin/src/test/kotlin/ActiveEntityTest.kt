@@ -39,7 +39,7 @@ class ActiveEntityTest : AbstractDbTest() {
         expect(false) { p.id == null }
         expect(true) { p.hasId }
     }
-    
+
     @Test fun saveCreates() {
         val p = Person { name = "foo"; age = 10 }
         p.save()
