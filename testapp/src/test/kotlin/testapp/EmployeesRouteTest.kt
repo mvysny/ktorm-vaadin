@@ -7,9 +7,8 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.test.expect
 
-class MainRouteTest {
+class EmployeesRouteTest {
     companion object {
         private lateinit var routes: Routes
         @BeforeAll
@@ -38,7 +37,7 @@ class MainRouteTest {
 
     @Test
     fun smoke() {
-        navigateTo<MainRoute>()
-        _expectOne<MainRoute>()
+        navigateTo<EmployeesRoute>()
+        _expectOne<EmployeesRoute>()
     }
 }

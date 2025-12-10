@@ -10,7 +10,7 @@ import com.github.mvysny.ktormvaadin.findAll
 import com.vaadin.flow.router.Route
 
 @Route("")
-class MainRoute : KComposite() {
+class EmployeesRoute : KComposite() {
     val root = ui {
         verticalLayout {
             setSizeFull()
