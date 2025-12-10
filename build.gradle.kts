@@ -7,13 +7,14 @@ plugins {
     `maven-publish`
     java
     signing
+    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
 }
 
 defaultTasks("clean", "build")
 
 allprojects {
-    group = "com.gitlab.mvysny.jdbiormvaadin"
-    version = "1.5-SNAPSHOT"
+    group = "com.github.mvysny.ktorm-vaadin"
+    version = "0.1-SNAPSHOT"
 
     repositories {
         mavenCentral()
@@ -31,11 +32,6 @@ subprojects {
         plugin("org.gradle.signing")
     }
 
-    java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
     // creates a reusable function which configures proper deployment to Maven Central
     ext["publishing"] = { artifactId: String ->
         java {
@@ -43,29 +39,24 @@ subprojects {
             withSourcesJar()
         }
 
+        java {
+            sourceCompatibility = JavaVersion.VERSION_17
+            targetCompatibility = JavaVersion.VERSION_17
+        }
         tasks.withType<Javadoc> {
             isFailOnError = false
         }
 
         publishing {
-            repositories {
-                maven {
-                    setUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-                    credentials {
-                        username = project.properties["ossrhUsername"] as String? ?: "Unknown user"
-                        password = project.properties["ossrhPassword"] as String? ?: "Unknown user"
-                    }
-                }
-            }
             publications {
                 create("mavenJava", MavenPublication::class.java).apply {
                     groupId = project.group.toString()
                     this.artifactId = artifactId
                     version = project.version.toString()
                     pom {
-                        description = "JDBI-ORM: Vaadin integration"
+                        description = "Ktorm bindings for Vaadin"
                         name = artifactId
-                        url = "https://gitlab.com/mvysny/jdbi-orm-vaadin"
+                        url = "https://github.com/mvysny/ktorm-vaadin"
                         licenses {
                             license {
                                 name = "The MIT License"
@@ -81,7 +72,7 @@ subprojects {
                             }
                         }
                         scm {
-                            url = "https://gitlab.com/mvysny/jdbi-orm-vaadin"
+                            url = "https://github.com/mvysny/ktorm-vaadin"
                         }
                     }
                     from(components["java"])
@@ -99,11 +90,16 @@ subprojects {
         testLogging {
             // to see the stacktraces of failed tests in the CI console.
             exceptionFormat = TestExceptionFormat.FULL
-            showStandardStreams = true
         }
     }
 }
 
-if (JavaVersion.current() > JavaVersion.VERSION_17 && gradle.startParameter.taskNames.contains("publish")) {
-    throw GradleException("Release this library with JDK 17, to ensure JDK17 compatibility; current JDK is ${JavaVersion.current()}")
+nexusPublishing {
+    repositories {
+        // see https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/#configuration
+        sonatype {
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+        }
+    }
 }
