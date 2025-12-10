@@ -6,7 +6,6 @@ slf4j = "2.0.17"
 [libraries]
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
-jetbrains-annotations = "org.jetbrains:annotations:24.1.0"
 vaadin-core = { module = "com.vaadin:vaadin-core", version.ref = "vaadin" }
 vaadinboot = "com.github.mvysny.vaadin-boot:vaadin-boot:13.4"
 # https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-engine/
@@ -15,8 +14,6 @@ kaributesting = "com.github.mvysny.kaributesting:karibu-testing-v24:2.4.3"
 hikaricp = "com.zaxxer:HikariCP:7.0.2"
 h2 = "com.h2database:h2:2.2.224"  # https://repo1.maven.org/maven2/com/h2database/h2/
 flyway = "org.flywaydb:flyway-core:11.18.0"  # https://repo1.maven.org/maven2/org/flywaydb/flyway-core/
-jdbiorm = "com.gitlab.mvysny.jdbiorm:jdbi-orm:2.10"  # https://repo1.maven.org/maven2/com/gitlab/mvysny/jdbiorm/jdbi-orm/
-vokorm = "com.github.mvysny.vokorm:vok-orm:3.2"
 
 [plugins]
 vaadin = { id = "com.vaadin", version.ref = "vaadin" }
