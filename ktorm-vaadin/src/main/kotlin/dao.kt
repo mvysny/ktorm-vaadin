@@ -3,7 +3,6 @@ package com.github.mvysny.ktormvaadin
 import org.ktorm.dsl.deleteAll
 import org.ktorm.entity.Entity
 import org.ktorm.entity.add
-import org.ktorm.entity.all
 import org.ktorm.entity.count
 import org.ktorm.entity.sequenceOf
 import org.ktorm.entity.single
