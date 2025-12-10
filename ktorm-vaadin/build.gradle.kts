@@ -3,6 +3,8 @@ dependencies {
     api(libs.ktorm)
     compileOnly(libs.vaadin.core)
     testImplementation(libs.vaadin.core)
+    api(libs.hibernate.validator)
+    implementation(libs.jakarta.el)
 
     // tests
     testImplementation(kotlin("test"))
