@@ -56,6 +56,8 @@ A database connection is created and a Ktorm `Database` instance is
 stored into `ActiveKtorm.database`. ktorm-vaadin assumes you connect to just one database
 and uses it to make all database calls.
 
+See `testapp`'s `Bootstrap.kt` file for a full example using FlyWay to create database structure.
+
 ## Entities and DAOs
 
 Make sure to go through Ktorm documentation to learn how `Entity`-ies and `Table`s work.
