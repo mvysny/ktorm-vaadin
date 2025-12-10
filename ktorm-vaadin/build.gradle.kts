@@ -11,7 +11,7 @@ dependencies {
     testImplementation(libs.hikaricp)
     testImplementation(libs.slf4j.simple)
     testImplementation(libs.h2) // https://repo1.maven.org/maven2/com/h2database/h2/
-    testImplementation(libs.kaributesting)
+    testImplementation(libs.karibu.testing)
 }
 
 val publishing = ext["publishing"] as (artifactId: String) -> Unit

@@ -8,6 +8,7 @@ dependencies {
 
     // Vaadin
     implementation(libs.vaadin.core)
+    implementation(libs.karibu.dsl)
     implementation(libs.vaadinboot)
 
     implementation(libs.slf4j.simple)
@@ -16,7 +17,7 @@ dependencies {
     implementation(libs.flyway)
 
     // Fast Vaadin unit-testing with Karibu-Testing: https://github.com/mvysny/karibu-testing
-    testImplementation(libs.kaributesting)
+    testImplementation(libs.karibu.testing)
     testImplementation(libs.junit.jupiter.engine)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
