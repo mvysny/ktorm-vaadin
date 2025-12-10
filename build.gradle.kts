@@ -31,7 +31,10 @@ subprojects {
         plugin("kotlin")
         plugin("org.gradle.signing")
     }
-
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
     // creates a reusable function which configures proper deployment to Maven Central
     ext["publishing"] = { artifactId: String ->
         java {
@@ -39,10 +42,6 @@ subprojects {
             withSourcesJar()
         }
 
-        java {
-            sourceCompatibility = JavaVersion.VERSION_17
-            targetCompatibility = JavaVersion.VERSION_17
-        }
         tasks.withType<Javadoc> {
             isFailOnError = false
         }

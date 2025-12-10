@@ -22,5 +22,5 @@ dependencies {
 }
 
 application {
-    mainClass = "testapp.Main"
+    mainClass = "testapp.MainKt"
 }
