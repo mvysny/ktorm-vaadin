@@ -34,6 +34,8 @@ class Bootstrap : ServletContextListener {
             .dataSource(dataSource)
             .load()
         flyway.migrate()
+        log.info("Demo data")
+        demoData()
         log.info("Started")
     }
 
