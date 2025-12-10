@@ -7,12 +7,13 @@ import com.zaxxer.hikari.HikariDataSource
 import jakarta.servlet.ServletContextEvent
 import jakarta.servlet.ServletContextListener
 import jakarta.servlet.annotation.WebListener
-import org.h2.Driver
 import org.ktorm.database.Database
 import org.slf4j.LoggerFactory
 
+// Required by Vaadin
 class AppShell : AppShellConfigurator
 
+// Called by Jetty before the app starts serving requests, and afterwards when it's killed.
 @WebListener
 class Bootstrap : ServletContextListener {
     // Called by Jetty when the app starts up.
@@ -20,7 +21,7 @@ class Bootstrap : ServletContextListener {
     override fun contextInitialized(servletContextEvent: ServletContextEvent?) {
         log.info("Connecting to the database")
         val cfg = HikariConfig().apply {
-            driverClassName = Driver::class.java.name
+            driverClassName = "org.h2.Driver"
             jdbcUrl = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
             username = "sa"
             password = ""
