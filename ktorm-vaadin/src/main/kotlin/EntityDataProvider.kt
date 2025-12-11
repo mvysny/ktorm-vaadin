@@ -38,12 +38,11 @@ class EntityDataProvider<T: Entity<T>>(val table: Table<T>) : AbstractBackEndDat
         return filter.and(filter2)
     }
 
-    private val Query<T, ColumnDeclaring<Boolean>>.orderBy: List<OrderByExpression> get() {
-        return sortOrders.map { sortOrder ->
+    private val Query<T, ColumnDeclaring<Boolean>>.orderBy: List<OrderByExpression>
+        get() = sortOrders.map { sortOrder ->
             val column = table[sortOrder.sorted]
             if (sortOrder.direction == SortDirection.ASCENDING) column.asc() else column.desc()
         }
-    }
 
     override fun fetchFromBackEnd(query: Query<T, ColumnDeclaring<Boolean>>): Stream<T> = db {
         var q = database.from(table).select()

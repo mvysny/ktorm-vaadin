@@ -2,12 +2,14 @@ package com.github.mvysny.ktormvaadin
 
 import com.github.mvysny.kaributesting.v10.expectList
 import com.github.mvysny.kaributools.fetchAll
+import com.vaadin.flow.data.provider.DataProvider
 import com.vaadin.flow.data.provider.Query
 import com.vaadin.flow.data.provider.QuerySortOrder
 import com.vaadin.flow.data.provider.SortDirection
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.ktorm.schema.Column
 import org.ktorm.schema.ColumnDeclaring
 import kotlin.test.expect
 
@@ -36,28 +38,32 @@ class EntityDataProviderTest : AbstractDbTest() {
 
     @Test
     fun sortingByName() {
-        val q = Query<Person, ColumnDeclaring<Boolean>>(
-            0,
-            Int.MAX_VALUE,
-            listOf(QuerySortOrder(Persons.name.name, SortDirection.ASCENDING)),
-            null,
-            null
-        )
-        val p = e.fetch(q).toList()
+        val p = e.fetchSortBy(Persons.name.asc)
         expect(10) { p.size }
         expectList("test 1", "test 10", "test 2", "test 3", "test 4", "test 5", "test 6", "test 7", "test 8", "test 9") { p.map { it.name } }
     }
     @Test
     fun sortingByNameDesc() {
-        val q = Query<Person, ColumnDeclaring<Boolean>>(
-            0,
-            Int.MAX_VALUE,
-            listOf(QuerySortOrder(Persons.name.name, SortDirection.DESCENDING)),
-            null,
-            null
-        )
-        val p = e.fetch(q).toList()
+        val p = e.fetchSortBy(Persons.name.desc)
         expect(10) { p.size }
         expectList("test 9", "test 8", "test 7", "test 6", "test 5", "test 4", "test 3", "test 2", "test 10", "test 1") { p.map { it.name } }
     }
+    @Test
+    fun sortingByAge() {
+        val p = e.fetchSortBy(Persons.age.asc)
+        expect(10) { p.size }
+        expectList("test 1", "test 2", "test 3", "test 4", "test 5", "test 6", "test 7", "test 8", "test 9", "test 10") { p.map { it.name } }
+    }
+    @Test
+    fun sortingByAgeDesc() {
+        val p = e.fetchSortBy(Persons.age.desc)
+        expect(10) { p.size }
+        expectList("test 10", "test 9", "test 8", "test 7", "test 6", "test 5", "test 4", "test 3", "test 2", "test 1") { p.map { it.name } }
+    }
 }
+
+private val Column<*>.asc: QuerySortOrder get() = QuerySortOrder(name, SortDirection.ASCENDING)
+private val Column<*>.desc: QuerySortOrder get() = QuerySortOrder(name, SortDirection.DESCENDING)
+private fun EntityDataProvider<Person>.fetchSortBy(vararg qs: QuerySortOrder): List<Person> = fetch(Query(
+    0, Int.MAX_VALUE, qs.toList(), null, null
+)).toList()
