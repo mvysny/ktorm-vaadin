@@ -2,6 +2,7 @@ package com.github.mvysny.ktormvaadin
 
 import com.github.mvysny.kaributesting.v10.expectList
 import com.github.mvysny.kaributools.fetchAll
+import com.vaadin.flow.data.provider.DataProvider
 import com.vaadin.flow.data.provider.Query
 import com.vaadin.flow.data.provider.QuerySortOrder
 import com.vaadin.flow.data.provider.SortDirection
@@ -87,16 +88,23 @@ class EntityDataProviderTest : AbstractDbTest() {
         expectList("test 5", "test 6") { e.fetchFilter(Persons.age gte 3, 1, 2).map { it.name } }
         expectList("test 7", "test 6") { e.fetchFilter(Persons.age gte 3, 1, 2, listOf(Persons.age.desc)).map { it.name } }
     }
+    @Test
+    fun stringFilter() {
+        val dp = e.withStringFilterOn(Persons.name)
+        expect(1) { dp.sizeFilter("test 5")}
+        expectList("test 5") { dp.fetchFilter("test 5").map { it.name }}
+        expect(2) { dp.sizeFilter("test 1")}
+        expectList("test 1", "test 10") { dp.fetchFilter("test 1").map { it.name }}
+        expect(10) { dp.sizeFilter("test ")}
+    }
 }
 
 private val Column<*>.asc: QuerySortOrder get() = QuerySortOrder(name, SortDirection.ASCENDING)
 private val Column<*>.desc: QuerySortOrder get() = QuerySortOrder(name, SortDirection.DESCENDING)
-private fun EntityDataProvider<Person>.fetchSortBy(vararg qs: QuerySortOrder): List<Person> = fetch(Query(
-    0, Int.MAX_VALUE, qs.toList(), null, null
-)).toList()
-private fun EntityDataProvider<Person>.fetchFilter(f: ColumnDeclaring<Boolean>, offset: Int = 0, limit: Int = Int.MAX_VALUE, sortOrders: List<QuerySortOrder> = listOf(Persons.name.asc)): List<Person> = fetch(Query(
+private fun EntityDataProvider<Person>.fetchSortBy(vararg qs: QuerySortOrder): List<Person> = fetchFilter(sortOrders = qs.toList())
+private fun <F> DataProvider<Person, F>.fetchFilter(f: F? = null, offset: Int = 0, limit: Int = Int.MAX_VALUE, sortOrders: List<QuerySortOrder> = listOf(Persons.name.asc)): List<Person> = fetch(Query(
     offset, limit, sortOrders, null, f
 )).toList()
-private fun EntityDataProvider<Person>.sizeFilter(f: ColumnDeclaring<Boolean>): Int = size(Query(
+private fun <F> DataProvider<Person, F>.sizeFilter(f: F? = null): Int = size(Query(
     0, Int.MAX_VALUE, listOf(), null, f
 ))
