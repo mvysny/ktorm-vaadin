@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class DepartmentsRouteTest : AbstractAppTest() {
-    @Test fun navigate() {
+    @BeforeEach fun navigate() {
         navigateTo<DepartmentsRoute>()
         _expectOne<DepartmentsRoute>()
     }
@@ -46,10 +46,10 @@ class DepartmentsRouteTest : AbstractAppTest() {
 
     @Test fun testSorting() {
         val grid = _get<Grid<Department>>()
-        grid.expectRowRegex(0, "\\d+", "Dept 0", "Location 0")
+        grid.expectRowRegex(0, "\\d+", "Dept 0", "Somewhere 0")
         grid.columns.filter { it.isSortable } .forEach {
             grid.sort(listOf(GridSortOrder(it, SortDirection.DESCENDING)))
-            grid.expectRows(112)
+            grid.expectRows(101)
         }
     }
 }
