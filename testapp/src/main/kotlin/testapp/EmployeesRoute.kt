@@ -16,7 +16,10 @@ import com.vaadin.flow.router.Route
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.support.postgresql.ilike
 
-// shows employees
+/**
+ * Shows employees. Demoes [com.github.mvysny.ktormvaadin.QueryDataProvider].
+ * TODO reimplement using QueryDataProvider
+ */
 @Route("", layout = MainLayout::class)
 class EmployeesRoute : KComposite() {
     private val idFilter = NumberRangePopup()
