@@ -88,28 +88,28 @@ class QueryDataProviderTest : AbstractDbTest() {
         expectList("test 5/4=street 4/city 4", "test 6/5=street 5/city 5") { e.fetchFilter(Persons.age gte 3, 1, 2).map { it.toString() } }
         expectList("test 7/6=street 6/city 6", "test 6/5=street 5/city 5") { e.fetchFilter(Persons.age gte 3, 1, 2, listOf(Persons.age.q.desc)).map { it.toString() } }
     }
-//    @Test
-//    fun stringFilter() {
-//        val dp = e.withStringFilterOn(Persons.name)
-//        expect(1) { dp.sizeFilter("test 5")}
-//        expectList("test 5") { dp.fetchFilter("test 5").map { it.name }}
-//        expect(2) { dp.sizeFilter("test 1")}
-//        expectList("test 1", "test 10") { dp.fetchFilter("test 1").map { it.name }}
-//        expect(10) { dp.sizeFilter("test ")}
-//    }
-//    @Test
-//    fun testWithGridSorting() {
-//       val g = Grid<Person>()
-//        g.dataProvider = e
-//        g.addColumn { it.name } .apply {
-//            setHeader("Name")
-//            key = Persons.name.e.key
-//            isSortable = true
-//        }
-//        g.sort(Persons.name.e.desc)
-//        g.expectRows(10)
-//        g.expectRow(0, "test 9")
-//    }
+    @Test
+    fun stringFilter() {
+        val dp = e.withStringFilterOn(Persons.name)
+        expect(1) { dp.sizeFilter("test 5")}
+        expectList("test 5/4=street 4/city 4") { dp.fetchFilter("test 5").map { it.toString() }}
+        expect(2) { dp.sizeFilter("test 1")}
+        expectList("test 1/0=street 0/city 0", "test 10/9=street 9/city 9") { dp.fetchFilter("test 1").map { it.toString() }}
+        expect(10) { dp.sizeFilter("test ")}
+    }
+    @Test
+    fun testWithGridSorting() {
+       val g = Grid<PersonAddress>()
+        g.dataProvider = e
+        g.addColumn { it.person.name } .apply {
+            setHeader("Name")
+            key = Persons.name.q.key
+            isSortable = true
+        }
+        g.sort(Persons.name.q.desc)
+        g.expectRows(10)
+        g.expectRow(0, "test 9")
+    }
 }
 
 object Addresses : Table<Address>("addresses") {
