@@ -17,7 +17,7 @@ import org.ktorm.dsl.gte
 import org.ktorm.dsl.lte
 import kotlin.test.expect
 
-class EntityDataProviderTest : AbstractDbTest() {
+class QueryDataProviderTest : AbstractDbTest() {
     private val e = EntityDataProvider(Persons)
 
     @BeforeEach
@@ -113,10 +113,3 @@ class EntityDataProviderTest : AbstractDbTest() {
     }
 }
 
-internal fun DataProvider<Person, *>.fetchSortBy(vararg qs: QuerySortOrder): List<Person> = fetchFilter(sortOrders = qs.toList())
-internal fun <F> DataProvider<Person, F>.fetchFilter(f: F? = null, offset: Int = 0, limit: Int = Int.MAX_VALUE, sortOrders: List<QuerySortOrder> = listOf(Persons.name.e.asc)): List<Person> = fetch(Query(
-    offset, limit, sortOrders, null, f
-)).toList()
-internal fun <F> DataProvider<Person, F>.sizeFilter(f: F? = null): Int = size(Query(
-    0, Int.MAX_VALUE, listOf(), null, f
-))

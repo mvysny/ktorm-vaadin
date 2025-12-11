@@ -18,7 +18,7 @@ import kotlin.test.expect
 
 class ActiveEntityTest : AbstractDbTest() {
     @BeforeEach fun prepareTestData() {
-        db { ddl("create table person (id int not null primary key auto_increment, name varchar(255) not null, age int not null)") }
+        Persons.create()
     }
 
     @AfterEach fun tearDownTestData() {
@@ -64,6 +64,9 @@ object Persons : Table<Person>("person") {
     val id = int("ID").primaryKey().bindTo { it.id }
     val name = varchar("NAME").bindTo { it.name }
     val age = int("AGE").bindTo { it.age }
+    fun create() {
+        db { ddl("create table person (id int not null primary key auto_increment, name varchar(255) not null, age int not null)") }
+    }
 }
 
 interface Person : ActiveEntity<Person> {
