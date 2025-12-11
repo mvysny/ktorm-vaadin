@@ -14,6 +14,7 @@ import com.vaadin.flow.router.Route
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.support.postgresql.ilike
 
+// shows departments
 @Route("departments", layout = MainLayout::class)
 class DepartmentsRoute : KComposite() {
     private val idFilter = NumberRangePopup()
