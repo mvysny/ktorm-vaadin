@@ -14,7 +14,8 @@ import com.github.mvysny.ktormvaadin.dataProvider
 import com.github.mvysny.ktormvaadin.e
 import com.github.mvysny.ktormvaadin.filter.DateRangePopup
 import com.github.mvysny.ktormvaadin.filter.FilterTextField
-import com.github.mvysny.ktormvaadin.filter.`in`
+import com.github.mvysny.ktormvaadin.filter.NumberRangePopup
+import com.github.mvysny.ktormvaadin.filter.between
 import com.vaadin.flow.router.Route
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.support.postgresql.ilike
@@ -24,6 +25,7 @@ class EmployeesRoute : KComposite() {
     private val nameFilter = FilterTextField("name_filter")
     private val jobFilter = FilterTextField("job_filter")
     private val hireDateFilter = DateRangePopup()
+    private val salaryFilter = NumberRangePopup()
     private val dataProvider = Employees.dataProvider
 
     val root = ui {
@@ -57,6 +59,7 @@ class EmployeesRoute : KComposite() {
                 val salaryCol = columnFor(Employee::salary, key = Employees.salary.e.key) {
                     setHeader("Salary")
                     isSortable = true
+                    filterBar.getCell(this).component = salaryFilter
                 }
                 sort(nameCol.asc, salaryCol.desc)
             }
@@ -67,6 +70,7 @@ class EmployeesRoute : KComposite() {
         nameFilter.addValueChangeListener { update() }
         jobFilter.addValueChangeListener { update() }
         hireDateFilter.addValueChangeListener { update() }
+        salaryFilter.addValueChangeListener { update() }
     }
 
     private fun update() {
@@ -77,7 +81,8 @@ class EmployeesRoute : KComposite() {
         if (jobFilter.value.isNotBlank()) {
             conditions += Employees.job.ilike(jobFilter.value.trim() + "%")
         }
-        conditions += Employees.hireDate.`in`(hireDateFilter.value)
+        conditions += Employees.hireDate.between(hireDateFilter.value)
+        conditions += Employees.salary.between(salaryFilter.value.asLongInterval())
         dataProvider.setFilter(conditions.and())
     }
 }

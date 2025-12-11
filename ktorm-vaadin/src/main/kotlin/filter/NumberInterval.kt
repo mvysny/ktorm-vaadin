@@ -8,7 +8,7 @@ import org.ktorm.schema.ColumnDeclaring
 import java.io.Serializable
 
 /**
- * A potentially open numeric range. If both [.getStart] and [.getEndInclusive] are `null`, then the interval accepts any number.
+ * A potentially open numeric range. If both [start] and [endInclusive] are `null`, then the interval accepts any number.
  *
  * Immutable, thread-safe.
  * @param start The minimum number in the range.
