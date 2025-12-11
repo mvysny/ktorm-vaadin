@@ -176,6 +176,10 @@ This project offers additional filter components:
 * `DateRangePopup`: allows the user to select a date range. The range may be open (only the 'from' or 'to' date filled in, but not both). Usually matched using the `between()` operator.
 * `NumberRangePopup`: allows the user to select a numeric range. The range may be open (only the 'from' or 'to' number filled in, but not both). Usually matched using the `between()` operator.
 
+## Forms
+
+TODO how to implement a Department picker ComboBox.
+
 ## Further Documentation
 
 This project contains a bundled app named `testapp`. You can run it easily:
