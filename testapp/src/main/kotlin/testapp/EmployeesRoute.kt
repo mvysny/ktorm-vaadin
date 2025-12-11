@@ -9,11 +9,13 @@ import com.github.mvysny.karibudsl.v10.verticalLayout
 import com.github.mvysny.kaributools.asc
 import com.github.mvysny.kaributools.desc
 import com.github.mvysny.kaributools.sort
+import com.github.mvysny.ktormvaadin.and
 import com.github.mvysny.ktormvaadin.dataProvider
 import com.github.mvysny.ktormvaadin.e
+import com.github.mvysny.ktormvaadin.filter.DateRangePopup
 import com.github.mvysny.ktormvaadin.filter.FilterTextField
+import com.github.mvysny.ktormvaadin.filter.`in`
 import com.vaadin.flow.router.Route
-import org.ktorm.dsl.and
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.support.postgresql.ilike
 
@@ -21,6 +23,7 @@ import org.ktorm.support.postgresql.ilike
 class EmployeesRoute : KComposite() {
     private val nameFilter = FilterTextField("name_filter")
     private val jobFilter = FilterTextField("job_filter")
+    private val hireDateFilter = DateRangePopup()
     private val dataProvider = Employees.dataProvider
 
     val root = ui {
@@ -49,6 +52,7 @@ class EmployeesRoute : KComposite() {
                 columnFor(Employee::hireDate, key = Employees.hireDate.e.key) {
                     setHeader("Hire date")
                     isSortable = true
+                    filterBar.getCell(this).component = hireDateFilter
                 }
                 val salaryCol = columnFor(Employee::salary, key = Employees.salary.e.key) {
                     setHeader("Salary")
@@ -62,16 +66,18 @@ class EmployeesRoute : KComposite() {
     init {
         nameFilter.addValueChangeListener { update() }
         jobFilter.addValueChangeListener { update() }
+        hireDateFilter.addValueChangeListener { update() }
     }
 
     private fun update() {
-       val conditions = mutableListOf<ColumnDeclaring<Boolean>>()
+       val conditions = mutableListOf<ColumnDeclaring<Boolean>?>()
         if (nameFilter.value.isNotBlank()) {
             conditions += Employees.name.ilike(nameFilter.value.trim() + "%")
         }
         if (jobFilter.value.isNotBlank()) {
             conditions += Employees.job.ilike(jobFilter.value.trim() + "%")
         }
+        conditions += Employees.hireDate.`in`(hireDateFilter.value)
         dataProvider.setFilter(conditions.and())
     }
 }
