@@ -28,6 +28,7 @@ import kotlin.collections.map
  * entities use [EntityDataProvider]. Example of use:
  * ```
  * val dp = QueryDataProvider(
+ *   listOf(Reviews, Categories),
  *   { it.from(Reviews).leftJoin(Categories, on = Reviews.category eq Categories.id) },
  *   { it.select(*Reviews.columns.toTypedArray(), Categories.name)},
  *   { ReviewWithCategory.from(it) })
