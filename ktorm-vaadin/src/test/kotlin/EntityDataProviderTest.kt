@@ -13,7 +13,6 @@ import org.ktorm.dsl.eq
 import org.ktorm.dsl.gte
 import org.ktorm.dsl.lte
 import org.ktorm.schema.Column
-import org.ktorm.schema.ColumnDeclaring
 import kotlin.test.expect
 
 class EntityDataProviderTest : AbstractDbTest() {
