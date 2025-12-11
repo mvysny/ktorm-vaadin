@@ -20,7 +20,9 @@ import org.ktorm.support.postgresql.ilike
 @Route("")
 class EmployeesRoute : KComposite() {
     private val nameFilter = FilterTextField("name_filter")
+    private val jobFilter = FilterTextField("job_filter")
     private val dataProvider = Employees.dataProvider
+
     val root = ui {
         verticalLayout {
             setSizeFull()
@@ -42,6 +44,7 @@ class EmployeesRoute : KComposite() {
                 columnFor(Employee::job, key = Employees.job.e.key) {
                     setHeader("Job")
                     isSortable = true
+                    filterBar.getCell(this).component = jobFilter
                 }
                 columnFor(Employee::hireDate, key = Employees.hireDate.e.key) {
                     setHeader("Hire date")
@@ -58,12 +61,16 @@ class EmployeesRoute : KComposite() {
 
     init {
         nameFilter.addValueChangeListener { update() }
+        jobFilter.addValueChangeListener { update() }
     }
 
     private fun update() {
        val conditions = mutableListOf<ColumnDeclaring<Boolean>>()
         if (nameFilter.value.isNotBlank()) {
             conditions += Employees.name.ilike(nameFilter.value.trim() + "%")
+        }
+        if (jobFilter.value.isNotBlank()) {
+            conditions += Employees.job.ilike(jobFilter.value.trim() + "%")
         }
         dataProvider.setFilter(conditions.and())
     }

@@ -52,6 +52,22 @@ class EmployeesRouteTest {
         _get<Grid<Employee>>().expectRows(2)
     }
 
+    @Test
+    fun testJobFilter() {
+        navigateTo<EmployeesRoute>()
+        _get<TextField> { id = "job_filter" }._value = "Manager"
+        _get<Grid<Employee>>().expectRow(0, "1", "Manager 0", "Manager", "2025-11-12", "6000")
+        _get<Grid<Employee>>().expectRows(11)
+    }
+
+    @Test
+    fun testNameAndJobFilter() {
+        navigateTo<EmployeesRoute>()
+        _get<TextField> { id = "name_filter" }._value = "Employee"
+        _get<TextField> { id = "job_filter" }._value = "Manager"
+        _get<Grid<Employee>>().expectRows(0)
+    }
+
     @Test fun testSorting() {
         _get<Grid<Employee>>().expectRow(0, "12", "Employee 0", "Employee", "2025-11-12", "6000")
     }
