@@ -80,6 +80,13 @@ class EntityDataProviderTest : AbstractDbTest() {
         expect(5) { e.sizeFilter(Persons.age gte 3) }
         expectList("test 4", "test 5", "test 6", "test 7", "test 8") { e.fetchFilter(Persons.age gte 3).map { it.name } }
     }
+    @Test
+    fun queryAll() {
+        e.setFilter(Persons.age lte 7)
+        expect(5) { e.sizeFilter(Persons.age gte 3) }
+        expectList("test 5", "test 6") { e.fetchFilter(Persons.age gte 3, 1, 2).map { it.name } }
+        expectList("test 7", "test 6") { e.fetchFilter(Persons.age gte 3, 1, 2, listOf(Persons.age.desc)).map { it.name } }
+    }
 }
 
 private val Column<*>.asc: QuerySortOrder get() = QuerySortOrder(name, SortDirection.ASCENDING)
@@ -87,8 +94,8 @@ private val Column<*>.desc: QuerySortOrder get() = QuerySortOrder(name, SortDire
 private fun EntityDataProvider<Person>.fetchSortBy(vararg qs: QuerySortOrder): List<Person> = fetch(Query(
     0, Int.MAX_VALUE, qs.toList(), null, null
 )).toList()
-private fun EntityDataProvider<Person>.fetchFilter(f: ColumnDeclaring<Boolean>): List<Person> = fetch(Query(
-    0, Int.MAX_VALUE, listOf(Persons.name.asc), null, f
+private fun EntityDataProvider<Person>.fetchFilter(f: ColumnDeclaring<Boolean>, offset: Int = 0, limit: Int = Int.MAX_VALUE, sortOrders: List<QuerySortOrder> = listOf(Persons.name.asc)): List<Person> = fetch(Query(
+    offset, limit, sortOrders, null, f
 )).toList()
 private fun EntityDataProvider<Person>.sizeFilter(f: ColumnDeclaring<Boolean>): Int = size(Query(
     0, Int.MAX_VALUE, listOf(), null, f
