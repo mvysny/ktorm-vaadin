@@ -4,7 +4,9 @@ import jakarta.validation.ConstraintViolationException
 import org.ktorm.entity.Entity
 import org.ktorm.schema.Column
 import org.ktorm.schema.NestedBinding
+import org.ktorm.schema.ReferenceBinding
 import org.ktorm.schema.Table
+import kotlin.reflect.KProperty1
 
 /**
  * An active entity which is able to:
@@ -55,7 +57,7 @@ interface ActiveEntity<E : ActiveEntity<E>> : Entity<E> {
      */
     val hasId: Boolean get() {
         check(table.primaryKeys.isNotEmpty()) { "Primary keys cannot be empty" }
-        return table.primaryKeys.any { get(it.propertyName) != null }
+        return table.primaryKeys.any { get(it.property.name) != null }
     }
 
     /**
@@ -83,10 +85,14 @@ interface ActiveEntity<E : ActiveEntity<E>> : Entity<E> {
     }
 }
 
-val Column<*>.propertyName: String
-    get() {
-        val b =
-            checkNotNull(binding) { "$this is not bound to an entity, can't retrieve entity's property name of this column" }
-        check(b is NestedBinding) { "$this: unsupported binding $b" }
-        return b.properties.last().name
+/**
+ * Returns the Kotlin [KProperty1] of a bean this column is bound to.
+ */
+val Column<*>.property: KProperty1<*, *>
+    get() = if (binding is ReferenceBinding) {
+        (binding as ReferenceBinding).onProperty
+    } else {
+        val properties = (binding as NestedBinding).properties
+        require(properties.size == 1) { "$this: nested properties aren't supported: $binding" }
+        properties[0]
     }
