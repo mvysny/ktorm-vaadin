@@ -102,7 +102,7 @@ class EntityDataProviderTest : AbstractDbTest() {
     fun testWithGridSorting() {
        val g = Grid<Person>()
         g.dataProvider = e
-        g.addColumn { Person::name } .apply {
+        g.addColumn { it.name } .apply {
             setHeader("Name")
             key = Persons.name.e.key
             isSortable = true
