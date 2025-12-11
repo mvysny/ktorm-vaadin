@@ -4,11 +4,18 @@ import com.vaadin.flow.data.provider.AbstractBackEndDataProvider
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider
 import com.vaadin.flow.data.provider.DataProvider
 import com.vaadin.flow.data.provider.Query
+import com.vaadin.flow.data.provider.QuerySortOrder
 import com.vaadin.flow.data.provider.SortDirection
 import com.vaadin.flow.function.SerializableFunction
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
+import org.ktorm.expression.BinaryExpression
 import org.ktorm.expression.OrderByExpression
+import org.ktorm.expression.OrderType
+import org.ktorm.expression.ScalarExpression
+import org.ktorm.expression.SqlExpression
+import org.ktorm.expression.UnaryExpression
+import org.ktorm.schema.BaseTable
 import org.ktorm.schema.Column
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.schema.Table
@@ -32,7 +39,12 @@ import kotlin.collections.map
  * @param rowMapper converts [QueryRowSet] to the bean [T]
  * @param T the bean type returned by this data provider.
  */
-class QueryDataProvider<T>(val querySource: (Database) -> QuerySource, val query: (QuerySource) -> org.ktorm.dsl.Query, val rowMapper: (QueryRowSet) -> T) : AbstractBackEndDataProvider<T, ColumnDeclaring<Boolean>>(),
+class QueryDataProvider<T>(
+    val tables: List<BaseTable<*>>,
+    val querySource: (Database) -> QuerySource,
+    val query: (QuerySource) -> org.ktorm.dsl.Query,
+    val rowMapper: (QueryRowSet) -> T
+) : AbstractBackEndDataProvider<T, ColumnDeclaring<Boolean>>(),
     ConfigurableFilterDataProvider<T, ColumnDeclaring<Boolean>, ColumnDeclaring<Boolean>> {
 
     private var filter: ColumnDeclaring<Boolean>? = null
@@ -45,16 +57,37 @@ class QueryDataProvider<T>(val querySource: (Database) -> QuerySource, val query
         return filter.and(filter2)
     }
 
+    private fun findExpression(expr: SqlExpression, toString: String): SqlExpression? {
+        if (expr.toString() == toString) {
+            return expr
+        }
+        if (expr is UnaryExpression<*>) {
+            findExpression(expr.operand, toString).takeIf { it != null }
+                ?.let { return it }
+        }
+        if (expr is BinaryExpression<*>) {
+            findExpression(expr.left, toString).takeIf { it != null }
+                ?.let { return it }
+            findExpression(expr.right, toString).takeIf { it != null }
+                ?.let { return it }
+        }
+        return null
+    }
+    private fun findExpression(table: BaseTable<*>, toString: String): SqlExpression? =
+        table.columns.map { it.asExpression() } .firstOrNull { it.toString() == toString }
+
     private val Query<T, ColumnDeclaring<Boolean>>.orderBy: List<OrderByExpression> get() {
+        val selectExpr = querySource(ActiveKtorm.database).expression
         return sortOrders.map { sortOrder ->
-            val table =querySource(ActiveKtorm.database).sourceTable
-            // @TODO this only takes the first table into account!
-            val column = try {
-                table[sortOrder.sorted]
-            } catch (e: NoSuchElementException) {
-                throw RuntimeException("No column with name ${sortOrder.sorted}. Available column names: ${table.columns.map { it.name }}", e)
+            var expr: SqlExpression? = tables.mapNotNull { findExpression(it, sortOrder.sorted) } .firstOrNull()
+            if (expr == null) {
+                expr = findExpression(selectExpr, sortOrder.sorted)
             }
-            if (sortOrder.direction == SortDirection.ASCENDING) column.asc() else column.desc()
+            checkNotNull(expr) {
+                "Expression ${sortOrder.sorted} not found in $selectExpr"
+            }
+            val ot = if (sortOrder.direction == SortDirection.ASCENDING) OrderType.ASCENDING else OrderType.DESCENDING
+            OrderByExpression(expr as ScalarExpression<*>, ot)
         }
     }
 
@@ -123,3 +156,24 @@ fun <T> QueryDataProvider<T>.withStringFilterOn(column: Column<String>): DataPro
     withStringFilter {
         column.ilike("${it.trim()}%")
     }
+
+/**
+ * Provides column keys for [QueryDataProvider]-based grids.
+ */
+val Column<*>.q: QueryDataProviderColumnKey get() = QueryDataProviderColumnKey(this)
+
+/**
+ * Provides column keys for [QueryDataProvider]-based grids.
+ */
+data class QueryDataProviderColumnKey(val column: Column<*>) {
+    /**
+     * @return key Use this value for Vaadin Grid Column key.
+     */
+    val key: String get() = column.asExpression().toString()
+    val asc: QuerySortOrder get() = QuerySortOrder(key, SortDirection.ASCENDING)
+    val desc: QuerySortOrder
+        get() = QuerySortOrder(
+            key,
+            SortDirection.DESCENDING
+        )
+}

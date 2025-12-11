@@ -53,15 +53,16 @@ class QueryDataProviderTest : AbstractDbTest() {
 
     @Test
     fun sortingByStreet() {
-        val p = e.fetchSortBy(Addresses.street.e.desc)
+        val p = e.fetchSortBy(Addresses.street.q.desc)
         expect(10) { p.size }
         expectList("test 10/9=street 9/city 9", "test 9/8=street 8/city 8") { p.take(2).map { it.toString() } }
     }
+
     @Test
     fun sortingByName() {
-        val p = e.fetchSortBy(Persons.name.e.desc)
+        val p = e.fetchSortBy(Persons.name.q.desc)
         expect(10) { p.size }
-        expectList("test 10/9=street 9/city 9", "test 9/8=street 8/city 8") { p.take(2).map { it.toString() } }
+        expectList("test 9/8=street 8/city 8", "test 8/7=street 7/city 7") { p.take(2).map { it.toString() } }
     }
 //    @Test
 //    fun sortingByNameDesc() {
@@ -157,6 +158,7 @@ data class PersonAddress(val person: Person, val address: Address) {
             Persons.createEntity(row), Addresses.createEntity(row)
         )
         val dataProvider: QueryDataProvider<PersonAddress> get() = QueryDataProvider(
+            listOf(Addresses, Persons),
             { it.from(Addresses).leftJoin(Persons, on = Addresses.of_person_id eq Persons.id) },
             { it.select(*Addresses.columns.toTypedArray(), *Persons.columns.toTypedArray())},
             { from(it) }
