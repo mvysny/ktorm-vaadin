@@ -23,7 +23,6 @@ import org.ktorm.support.postgresql.ilike
 
 /**
  * Shows employees. Demoes [com.github.mvysny.ktormvaadin.QueryDataProvider].
- * TODO reimplement using QueryDataProvider
  */
 @Route("", layout = MainLayout::class)
 class EmployeesRoute : KComposite() {
@@ -32,6 +31,7 @@ class EmployeesRoute : KComposite() {
     private val jobFilter = FilterTextField("job_filter")
     private val hireDateFilter = DateRangePopup()
     private val salaryFilter = NumberRangePopup()
+    private val deptFilter = FilterTextField("dept_filter")
     private val dataProvider = EmployeeDept.dataProvider
 
     val root = ui {
@@ -73,6 +73,12 @@ class EmployeesRoute : KComposite() {
                     isSortable = true
                     filterBar.getCell(this).component = salaryFilter
                 }
+                column({ it.d.name }) {
+                    setHeader("Department")
+                    key = Departments.name.q.key
+                    isSortable = true
+                    filterBar.getCell(this).component = deptFilter
+                }
                 sort(nameCol.asc, salaryCol.desc)
             }
         }
@@ -84,7 +90,7 @@ class EmployeesRoute : KComposite() {
         jobFilter.addValueChangeListener { update() }
         hireDateFilter.addValueChangeListener { update() }
         salaryFilter.addValueChangeListener { update() }
-        idFilter.addValueChangeListener { update() }
+        deptFilter.addValueChangeListener { update() }
     }
 
     private fun update() {
@@ -98,6 +104,9 @@ class EmployeesRoute : KComposite() {
         }
         conditions += Employees.hireDate.between(hireDateFilter.value)
         conditions += Employees.salary.between(salaryFilter.value.asLongInterval())
+        if (deptFilter.value.isNotBlank()) {
+            conditions += Departments.name.ilike(deptFilter.value.trim() + "%")
+        }
         dataProvider.setFilter(conditions.and())
     }
 }

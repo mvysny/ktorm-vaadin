@@ -3,7 +3,9 @@ package testapp
 import com.github.mvysny.kaributesting.v10.*
 import com.github.mvysny.kaributools.navigateTo
 import com.vaadin.flow.component.grid.Grid
+import com.vaadin.flow.component.grid.GridSortOrder
 import com.vaadin.flow.component.textfield.TextField
+import com.vaadin.flow.data.provider.SortDirection
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -11,17 +13,18 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class DepartmentsRouteTest : AbstractAppTest() {
-    @Test
-    fun smoke() {
+    @Test fun navigate() {
         navigateTo<DepartmentsRoute>()
         _expectOne<DepartmentsRoute>()
+    }
+    @Test
+    fun smoke() {
         _get<Grid<Department>>().expectRows(101)
         _get<Grid<Department>>().expectRowRegex(0, "\\d+", "Dept 0", "Somewhere 0")
     }
 
     @Test
     fun testNameFilter() {
-        navigateTo<DepartmentsRoute>()
         _get<TextField> { id = "name_filter" }._value = "Dept 1"
         _get<Grid<Department>>().expectRowRegex(0, "\\d+", "Dept 1", "Somewhere 1")
         _get<Grid<Department>>().expectRows(12)
@@ -29,7 +32,6 @@ class DepartmentsRouteTest : AbstractAppTest() {
 
     @Test
     fun testLocationFilter() {
-        navigateTo<DepartmentsRoute>()
         _get<TextField> { id = "location_filter" }._value = "Somewhere 2"
         _get<Grid<Department>>().expectRowRegex(0, "\\d+", "Dept 2", "Somewhere 2")
         _get<Grid<Department>>().expectRows(11)
@@ -37,13 +39,17 @@ class DepartmentsRouteTest : AbstractAppTest() {
 
     @Test
     fun testNameAndJobFilter() {
-        navigateTo<DepartmentsRoute>()
         _get<TextField> { id = "name_filter" }._value = "Dept 1"
         _get<TextField> { id = "location_filter" }._value = "Somewhere 2"
         _get<Grid<Department>>().expectRows(0)
     }
 
     @Test fun testSorting() {
-        _get<Grid<Department>>().expectRowRegex(0, "\\d+", "Employee 0", "Employee", "2025-11-12", "6000")
+        val grid = _get<Grid<Department>>()
+        grid.expectRowRegex(0, "\\d+", "Dept 0", "Location 0")
+        grid.columns.filter { it.isSortable } .forEach {
+            grid.sort(listOf(GridSortOrder(it, SortDirection.DESCENDING)))
+            grid.expectRows(112)
+        }
     }
 }
