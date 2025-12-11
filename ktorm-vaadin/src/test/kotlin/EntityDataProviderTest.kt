@@ -98,8 +98,8 @@ class EntityDataProviderTest : AbstractDbTest() {
     }
 }
 
-private val Column<*>.asc: QuerySortOrder get() = QuerySortOrder(name, SortDirection.ASCENDING)
-private val Column<*>.desc: QuerySortOrder get() = QuerySortOrder(name, SortDirection.DESCENDING)
+private val Column<*>.asc: QuerySortOrder get() = QuerySortOrder(key, SortDirection.ASCENDING)
+private val Column<*>.desc: QuerySortOrder get() = QuerySortOrder(key, SortDirection.DESCENDING)
 private fun EntityDataProvider<Person>.fetchSortBy(vararg qs: QuerySortOrder): List<Person> = fetchFilter(sortOrders = qs.toList())
 private fun <F> DataProvider<Person, F>.fetchFilter(f: F? = null, offset: Int = 0, limit: Int = Int.MAX_VALUE, sortOrders: List<QuerySortOrder> = listOf(Persons.name.asc)): List<Person> = fetch(Query(
     offset, limit, sortOrders, null, f

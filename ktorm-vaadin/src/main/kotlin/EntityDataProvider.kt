@@ -1,6 +1,5 @@
 package com.github.mvysny.ktormvaadin
 
-import com.vaadin.flow.data.binder.Binder
 import com.vaadin.flow.data.provider.*
 import com.vaadin.flow.data.provider.Query
 import com.vaadin.flow.function.SerializableFunction
@@ -13,7 +12,6 @@ import org.ktorm.expression.OrderByExpression
 import org.ktorm.schema.*
 import org.ktorm.support.postgresql.ilike
 import java.util.stream.Stream
-import kotlin.reflect.KProperty1
 
 /**
  * Loads entities [T] from given [table]. Example of use:
@@ -40,7 +38,11 @@ class EntityDataProvider<T: Entity<T>>(val table: Table<T>) : AbstractBackEndDat
 
     private val Query<T, ColumnDeclaring<Boolean>>.orderBy: List<OrderByExpression>
         get() = sortOrders.map { sortOrder ->
-            val column = table[sortOrder.sorted]
+            val column = try {
+                table[sortOrder.sorted]
+            } catch (e: NoSuchElementException) {
+                throw RuntimeException("No column with name ${sortOrder.sorted}. Available column names: ${table.columns.map { it.name }}", e)
+            }
             if (sortOrder.direction == SortDirection.ASCENDING) column.asc() else column.desc()
         }
 
@@ -108,3 +110,7 @@ fun <T: Entity<T>> EntityDataProvider<T>.withStringFilterOn(column: Column<Strin
         column.ilike("${it.trim()}%")
     }
 
+/**
+ * Use this value for Vaadin Grid Column key.
+ */
+val Column<*>.key: String get() = name
