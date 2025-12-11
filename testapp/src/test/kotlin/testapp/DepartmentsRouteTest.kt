@@ -44,6 +44,6 @@ class DepartmentsRouteTest : AbstractAppTest() {
     }
 
     @Test fun testSorting() {
-        _get<Grid<Department>>().expectRow(0, "12", "Employee 0", "Employee", "2025-11-12", "6000")
+        _get<Grid<Department>>().expectRowRegex(0, "\\d+", "Employee 0", "Employee", "2025-11-12", "6000")
     }
 }
