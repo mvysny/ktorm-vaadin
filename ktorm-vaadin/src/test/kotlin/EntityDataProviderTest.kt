@@ -1,18 +1,20 @@
 package com.github.mvysny.ktormvaadin
 
 import com.github.mvysny.kaributesting.v10.expectList
+import com.github.mvysny.kaributesting.v10.expectRow
+import com.github.mvysny.kaributesting.v10.expectRows
 import com.github.mvysny.kaributools.fetchAll
+import com.github.mvysny.kaributools.sort
+import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.data.provider.DataProvider
 import com.vaadin.flow.data.provider.Query
 import com.vaadin.flow.data.provider.QuerySortOrder
-import com.vaadin.flow.data.provider.SortDirection
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.gte
 import org.ktorm.dsl.lte
-import org.ktorm.schema.Column
 import kotlin.test.expect
 
 class EntityDataProviderTest : AbstractDbTest() {
@@ -95,6 +97,19 @@ class EntityDataProviderTest : AbstractDbTest() {
         expect(2) { dp.sizeFilter("test 1")}
         expectList("test 1", "test 10") { dp.fetchFilter("test 1").map { it.name }}
         expect(10) { dp.sizeFilter("test ")}
+    }
+    @Test
+    fun testWithGridSorting() {
+       val g = Grid<Person>()
+        g.dataProvider = e
+        g.addColumn { Person::name } .apply {
+            setHeader("Name")
+            key = Persons.name.e.key
+            isSortable = true
+        }
+        g.sort(Persons.name.e.desc)
+        g.expectRows(10)
+        g.expectRow(0, "test 9")
     }
 }
 
