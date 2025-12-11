@@ -64,36 +64,17 @@ class QueryDataProviderTest : AbstractDbTest() {
         expect(10) { p.size }
         expectList("test 9/8=street 8/city 8", "test 8/7=street 7/city 7") { p.take(2).map { it.toString() } }
     }
-//    @Test
-//    fun sortingByNameDesc() {
-//        val p = e.fetchSortBy(Persons.name.e.desc)
-//        expect(10) { p.size }
-//        expectList("test 9", "test 8", "test 7", "test 6", "test 5", "test 4", "test 3", "test 2", "test 10", "test 1") { p.map { it.name } }
-//    }
-//    @Test
-//    fun sortingByAge() {
-//        val p = e.fetchSortBy(Persons.age.e.asc)
-//        expect(10) { p.size }
-//        expectList("test 1", "test 2", "test 3", "test 4", "test 5", "test 6", "test 7", "test 8", "test 9", "test 10") { p.map { it.name } }
-//    }
-//    @Test
-//    fun sortingByAgeDesc() {
-//        val p = e.fetchSortBy(Persons.age.e.desc)
-//        expect(10) { p.size }
-//        expectList("test 10", "test 9", "test 8", "test 7", "test 6", "test 5", "test 4", "test 3", "test 2", "test 1") { p.map { it.name } }
-//    }
-//
-//    @Test
-//    fun settableFilter() {
-//        e.setFilter(Persons.age eq 5)
-//        expect(1) { e.size(Query()) }
-//        expectList("test 6") { e.fetchAll().map { it.name } }
-//    }
-//    @Test
-//    fun queryFilter() {
-//        expect(1) { e.sizeFilter(Persons.age eq 5) }
-//        expectList("test 6") { e.fetchFilter(Persons.age eq 5).map { it.name } }
-//    }
+    @Test
+    fun settableFilter() {
+        e.setFilter(Persons.age eq 5)
+        expect(1) { e.size(Query()) }
+        expectList("test 6/5=street 5/city 5") { e.fetchAll().map { it.toString() } }
+    }
+    @Test
+    fun queryFilter() {
+        expect(1) { e.sizeFilter(Persons.age eq 5) }
+        expectList("test 6/5=street 5/city 5") { e.fetchFilter(Persons.age eq 5).map { it.toString() } }
+    }
 //    @Test
 //    fun queryBothFilters() {
 //        e.setFilter(Persons.age lte 7)
