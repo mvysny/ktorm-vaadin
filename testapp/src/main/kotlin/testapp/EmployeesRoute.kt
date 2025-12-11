@@ -11,17 +11,25 @@ import com.github.mvysny.kaributools.desc
 import com.github.mvysny.kaributools.sort
 import com.github.mvysny.ktormvaadin.dataProvider
 import com.github.mvysny.ktormvaadin.e
+import com.github.mvysny.ktormvaadin.filter.FilterTextField
 import com.vaadin.flow.router.Route
+import org.ktorm.dsl.and
+import org.ktorm.schema.ColumnDeclaring
+import org.ktorm.support.postgresql.ilike
 
 @Route("")
 class EmployeesRoute : KComposite() {
+    private val nameFilter = FilterTextField("name_filter")
+    private val dataProvider = Employees.dataProvider
     val root = ui {
         verticalLayout {
             setSizeFull()
             h1("ktorm-vaadin")
-            grid<Employee>(Employees.dataProvider) {
+            grid<Employee>(dataProvider) {
                 setWidthFull(); isExpand = true
                 isMultiSort = true
+                appendHeaderRow()
+                val filterBar = prependHeaderRow()
                 columnFor(Employee::id, key = Employees.id.e.key) {
                     setHeader("ID")
                     isSortable = true
@@ -29,6 +37,7 @@ class EmployeesRoute : KComposite() {
                 val nameCol = columnFor(Employee::name, key = Employees.name.e.key) {
                     setHeader("Name")
                     isSortable = true
+                    filterBar.getCell(this).component = nameFilter
                 }
                 columnFor(Employee::job, key = Employees.job.e.key) {
                     setHeader("Job")
@@ -45,5 +54,17 @@ class EmployeesRoute : KComposite() {
                 sort(nameCol.asc, salaryCol.desc)
             }
         }
+    }
+
+    init {
+        nameFilter.addValueChangeListener { update() }
+    }
+
+    private fun update() {
+       val conditions = mutableListOf<ColumnDeclaring<Boolean>>()
+        if (nameFilter.value.isNotBlank()) {
+            conditions += Employees.name.ilike(nameFilter.value.trim() + "%")
+        }
+        dataProvider.setFilter(conditions.and())
     }
 }
