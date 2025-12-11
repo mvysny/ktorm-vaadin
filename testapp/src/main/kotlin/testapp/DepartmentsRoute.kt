@@ -12,7 +12,6 @@ import com.github.mvysny.kaributools.sort
 import com.github.mvysny.ktormvaadin.and
 import com.github.mvysny.ktormvaadin.dataProvider
 import com.github.mvysny.ktormvaadin.e
-import com.github.mvysny.ktormvaadin.filter.DateRangePopup
 import com.github.mvysny.ktormvaadin.filter.FilterTextField
 import com.github.mvysny.ktormvaadin.filter.NumberRangePopup
 import com.github.mvysny.ktormvaadin.filter.between
@@ -20,50 +19,38 @@ import com.vaadin.flow.router.Route
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.support.postgresql.ilike
 
-@Route("")
-class EmployeesRoute : KComposite() {
+@Route("departments")
+class DepartmentsRoute : KComposite() {
     private val idFilter = NumberRangePopup()
     private val nameFilter = FilterTextField("name_filter")
-    private val jobFilter = FilterTextField("job_filter")
-    private val hireDateFilter = DateRangePopup()
-    private val salaryFilter = NumberRangePopup()
-    private val dataProvider = Employees.dataProvider
+    private val locationFilter = FilterTextField("location_filter")
+    private val dataProvider = Departments.dataProvider
 
     val root = ui {
         verticalLayout {
             setSizeFull()
-            h1("Employees")
-            grid<Employee>(dataProvider) {
+            h1("Departments")
+            grid<Department>(dataProvider) {
                 setWidthFull(); isExpand = true
                 isMultiSort = true
                 appendHeaderRow()
                 val filterBar = prependHeaderRow()
-                columnFor(Employee::id, key = Employees.id.e.key) {
+                columnFor(Department::id, key = Departments.id.e.key) {
                     setHeader("ID")
                     isSortable = true
                     filterBar.getCell(this).component = idFilter
                 }
-                val nameCol = columnFor(Employee::name, key = Employees.name.e.key) {
+                val nameCol = columnFor(Department::name, key = Departments.name.e.key) {
                     setHeader("Name")
                     isSortable = true
                     filterBar.getCell(this).component = nameFilter
                 }
-                columnFor(Employee::job, key = Employees.job.e.key) {
-                    setHeader("Job")
+                columnFor(Department::location, key = Departments.location.e.key) {
+                    setHeader("Location")
                     isSortable = true
-                    filterBar.getCell(this).component = jobFilter
+                    filterBar.getCell(this).component = locationFilter
                 }
-                columnFor(Employee::hireDate, key = Employees.hireDate.e.key) {
-                    setHeader("Hire date")
-                    isSortable = true
-                    filterBar.getCell(this).component = hireDateFilter
-                }
-                val salaryCol = columnFor(Employee::salary, key = Employees.salary.e.key) {
-                    setHeader("Salary")
-                    isSortable = true
-                    filterBar.getCell(this).component = salaryFilter
-                }
-                sort(nameCol.asc, salaryCol.desc)
+                sort(nameCol.asc)
             }
         }
     }
@@ -71,23 +58,17 @@ class EmployeesRoute : KComposite() {
     init {
         idFilter.addValueChangeListener { update() }
         nameFilter.addValueChangeListener { update() }
-        jobFilter.addValueChangeListener { update() }
-        hireDateFilter.addValueChangeListener { update() }
-        salaryFilter.addValueChangeListener { update() }
-        idFilter.addValueChangeListener { update() }
+        locationFilter.addValueChangeListener { update() }
     }
 
     private fun update() {
        val conditions = mutableListOf<ColumnDeclaring<Boolean>?>()
-        conditions += Employees.id.between(idFilter.value.asIntegerInterval())
         if (nameFilter.value.isNotBlank()) {
             conditions += Employees.name.ilike(nameFilter.value.trim() + "%")
         }
-        if (jobFilter.value.isNotBlank()) {
-            conditions += Employees.job.ilike(jobFilter.value.trim() + "%")
+        if (locationFilter.value.isNotBlank()) {
+            conditions += Employees.job.ilike(locationFilter.value.trim() + "%")
         }
-        conditions += Employees.hireDate.between(hireDateFilter.value)
-        conditions += Employees.salary.between(salaryFilter.value.asLongInterval())
         dataProvider.setFilter(conditions.and())
     }
 }

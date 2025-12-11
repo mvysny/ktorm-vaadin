@@ -10,39 +10,39 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class EmployeesRouteTest : AbstractAppTest() {
+class DepartmentsRouteTest : AbstractAppTest() {
     @Test
     fun smoke() {
-        navigateTo<EmployeesRoute>()
-        _expectOne<EmployeesRoute>()
-        _get<Grid<Employee>>().expectRows(112)
+        navigateTo<DepartmentsRoute>()
+        _expectOne<DepartmentsRoute>()
+        _get<Grid<Department>>().expectRows(112)
     }
 
     @Test
     fun testNameFilter() {
-        navigateTo<EmployeesRoute>()
+        navigateTo<DepartmentsRoute>()
         _get<TextField> { id = "name_filter" }._value = "Manager 1"
-        _get<Grid<Employee>>().expectRowRegex(0, "\\d+", "Manager 1", "Manager", "2025-11-12", "6001")
-        _get<Grid<Employee>>().expectRows(2)
+        _get<Grid<Department>>().expectRow(0, "2", "Manager 1", "Manager", "2025-11-12", "6001")
+        _get<Grid<Department>>().expectRows(2)
     }
 
     @Test
     fun testJobFilter() {
-        navigateTo<EmployeesRoute>()
+        navigateTo<DepartmentsRoute>()
         _get<TextField> { id = "job_filter" }._value = "Manager"
-        _get<Grid<Employee>>().expectRowRegex(0, "\\d+", "Manager 0", "Manager", "2025-11-12", "6000")
-        _get<Grid<Employee>>().expectRows(11)
+        _get<Grid<Department>>().expectRow(0, "1", "Manager 0", "Manager", "2025-11-12", "6000")
+        _get<Grid<Department>>().expectRows(11)
     }
 
     @Test
     fun testNameAndJobFilter() {
-        navigateTo<EmployeesRoute>()
-        _get<TextField> { id = "name_filter" }._value = "Employee"
+        navigateTo<DepartmentsRoute>()
+        _get<TextField> { id = "name_filter" }._value = "Department"
         _get<TextField> { id = "job_filter" }._value = "Manager"
-        _get<Grid<Employee>>().expectRows(0)
+        _get<Grid<Department>>().expectRows(0)
     }
 
     @Test fun testSorting() {
-        _get<Grid<Employee>>().expectRow(0, "\\d+", "Employee 0", "Employee", "2025-11-12", "6000")
+        _get<Grid<Department>>().expectRow(0, "12", "Employee 0", "Employee", "2025-11-12", "6000")
     }
 }
