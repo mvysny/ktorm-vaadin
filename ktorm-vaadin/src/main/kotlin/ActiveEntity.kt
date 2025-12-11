@@ -62,8 +62,9 @@ interface ActiveEntity<E : ActiveEntity<E>> : Entity<E> {
 
     /**
      * Saves changes done in this entity to the database, or creates a new row if the entity has no ID.
+     * @return this
      */
-    fun save(validate: Boolean = true) {
+    fun save(validate: Boolean = true): E {
         if (validate) {
             validate()
         }
@@ -72,16 +73,21 @@ interface ActiveEntity<E : ActiveEntity<E>> : Entity<E> {
         } else {
             create(false)
         }
+        return self
     }
+
+    val self: E get() = this as E
 
     /**
      * Creates a new row. Shouldn't be called if the entity already has an ID.
+     * @return this
      */
-    fun create(validate: Boolean = true) {
+    fun create(validate: Boolean = true): E {
         if (validate) {
             validate()
         }
-        table.create(this as E)
+        table.create(self)
+        return self
     }
 }
 
