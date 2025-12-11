@@ -54,4 +54,4 @@ class DateInterval(start: LocalDate?, endInclusive: LocalDate?) : ClosedInterval
     }
 }
 
-fun Column<LocalDate>.`in`(interval: DateInterval): ColumnDeclaring<Boolean>? = interval.contains(this)
+fun Column<LocalDate>.between(interval: DateInterval): ColumnDeclaring<Boolean>? = interval.contains(this)
