@@ -15,14 +15,18 @@ import org.junit.jupiter.api.Test
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.gte
 import org.ktorm.dsl.lte
+import org.ktorm.entity.Entity
+import org.ktorm.schema.Table
+import org.ktorm.schema.int
+import org.ktorm.schema.varchar
 import kotlin.test.expect
 
 class QueryDataProviderTest : AbstractDbTest() {
     private val e = EntityDataProvider(Persons)
-
     @BeforeEach
     fun prepareTestData() {
         Persons.create()
+        Addresses.ddl()
         db {
             repeat(10) {
                 Person { name = "test ${it + 1}"; age = it }.save()
@@ -32,7 +36,7 @@ class QueryDataProviderTest : AbstractDbTest() {
 
     @AfterEach
     fun tearDownTestData() {
-        db { ddl("drop table if exists person") }
+        db { ddl("drop table if exists person; drop table if exists addresses") }
     }
 
     @Test
@@ -113,3 +117,23 @@ class QueryDataProviderTest : AbstractDbTest() {
     }
 }
 
+object Addresses : Table<Address>("addresses") {
+    val id = int("id").primaryKey().bindTo { it.id }
+    val street = varchar("street").bindTo { it.street }
+    val city = varchar("city").bindTo { it.city }
+    val of_person_id = int("of_person_id").bindTo { it.of_person_id }
+    fun ddl() = db {
+        ddl("create table addresses (id int primary key auto_increment, street varchar(255) not null, city varchar(255), of_person_id int)")
+    }
+}
+
+interface Address : ActiveEntity<Address> {
+    val id: Int?
+    val street: String?
+    val city: String?
+    val of_person_id: Int?
+    override val table: Table<Address>
+        get() = Addresses
+
+    companion object : Entity.Factory<Address>()
+}

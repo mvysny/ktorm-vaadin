@@ -7,7 +7,6 @@ import org.ktorm.dsl.update
 import org.ktorm.entity.Entity
 import org.ktorm.schema.*
 import java.time.LocalDate
-import kotlin.random.Random
 
 // See https://www.ktorm.org/en/schema-definition.html
 object Departments : Table<Department>("t_department") {
