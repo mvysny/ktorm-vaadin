@@ -58,13 +58,13 @@ fun demoData() {
             Department{name = "Dept $it"; location = "Somewhere $it"}.apply { create() }
         }
         val managers = (0..10).map {
-           Employee{name = "Manager $it"; job = "Manager"; hireDate = LocalDate.now(); salary =
-               Random.nextLong(1000, 10000); department = departments.random()
+           Employee{name = "Manager $it"; job = "Manager"; hireDate = LocalDate.of(2025, 11, 12); salary =
+               6000 + it.toLong(); department = departments.random()
            }.apply { create() }
         }
         (0..100).map {
-            Employee{name = "Employee $it"; job = "Employee"; hireDate = LocalDate.now();
-            salary = Random.nextLong(1000, 10000); department = departments.random()}.apply { create() }
+            Employee{name = "Employee $it"; job = "Employee"; hireDate = LocalDate.of(2025, 11, 12)
+            salary = 6000 + it.toLong(); department = departments.random()}.apply { create() }
         }
     }
 }

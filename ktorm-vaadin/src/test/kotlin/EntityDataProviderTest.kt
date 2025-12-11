@@ -40,25 +40,25 @@ class EntityDataProviderTest : AbstractDbTest() {
 
     @Test
     fun sortingByName() {
-        val p = e.fetchSortBy(Persons.name.asc)
+        val p = e.fetchSortBy(Persons.name.e.asc)
         expect(10) { p.size }
         expectList("test 1", "test 10", "test 2", "test 3", "test 4", "test 5", "test 6", "test 7", "test 8", "test 9") { p.map { it.name } }
     }
     @Test
     fun sortingByNameDesc() {
-        val p = e.fetchSortBy(Persons.name.desc)
+        val p = e.fetchSortBy(Persons.name.e.desc)
         expect(10) { p.size }
         expectList("test 9", "test 8", "test 7", "test 6", "test 5", "test 4", "test 3", "test 2", "test 10", "test 1") { p.map { it.name } }
     }
     @Test
     fun sortingByAge() {
-        val p = e.fetchSortBy(Persons.age.asc)
+        val p = e.fetchSortBy(Persons.age.e.asc)
         expect(10) { p.size }
         expectList("test 1", "test 2", "test 3", "test 4", "test 5", "test 6", "test 7", "test 8", "test 9", "test 10") { p.map { it.name } }
     }
     @Test
     fun sortingByAgeDesc() {
-        val p = e.fetchSortBy(Persons.age.desc)
+        val p = e.fetchSortBy(Persons.age.e.desc)
         expect(10) { p.size }
         expectList("test 10", "test 9", "test 8", "test 7", "test 6", "test 5", "test 4", "test 3", "test 2", "test 1") { p.map { it.name } }
     }
@@ -85,7 +85,7 @@ class EntityDataProviderTest : AbstractDbTest() {
         e.setFilter(Persons.age lte 7)
         expect(5) { e.sizeFilter(Persons.age gte 3) }
         expectList("test 5", "test 6") { e.fetchFilter(Persons.age gte 3, 1, 2).map { it.name } }
-        expectList("test 7", "test 6") { e.fetchFilter(Persons.age gte 3, 1, 2, listOf(Persons.age.desc)).map { it.name } }
+        expectList("test 7", "test 6") { e.fetchFilter(Persons.age gte 3, 1, 2, listOf(Persons.age.e.desc)).map { it.name } }
     }
     @Test
     fun stringFilter() {
@@ -98,10 +98,8 @@ class EntityDataProviderTest : AbstractDbTest() {
     }
 }
 
-private val Column<*>.asc: QuerySortOrder get() = QuerySortOrder(key, SortDirection.ASCENDING)
-private val Column<*>.desc: QuerySortOrder get() = QuerySortOrder(key, SortDirection.DESCENDING)
 private fun EntityDataProvider<Person>.fetchSortBy(vararg qs: QuerySortOrder): List<Person> = fetchFilter(sortOrders = qs.toList())
-private fun <F> DataProvider<Person, F>.fetchFilter(f: F? = null, offset: Int = 0, limit: Int = Int.MAX_VALUE, sortOrders: List<QuerySortOrder> = listOf(Persons.name.asc)): List<Person> = fetch(Query(
+private fun <F> DataProvider<Person, F>.fetchFilter(f: F? = null, offset: Int = 0, limit: Int = Int.MAX_VALUE, sortOrders: List<QuerySortOrder> = listOf(Persons.name.e.asc)): List<Person> = fetch(Query(
     offset, limit, sortOrders, null, f
 )).toList()
 private fun <F> DataProvider<Person, F>.sizeFilter(f: F? = null): Int = size(Query(

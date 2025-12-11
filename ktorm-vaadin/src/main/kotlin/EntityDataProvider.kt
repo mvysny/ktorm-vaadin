@@ -111,6 +111,22 @@ fun <T: Entity<T>> EntityDataProvider<T>.withStringFilterOn(column: Column<Strin
     }
 
 /**
- * Use this value for Vaadin Grid Column key.
+ * Provides column keys for [EntityDataProvider]-based grids.
  */
-val Column<*>.key: String get() = name
+val Column<*>.e: EntityDataProviderColumnKey get() = EntityDataProviderColumnKey(this)
+
+/**
+ * Provides column keys for [EntityDataProvider]-based grids.
+ */
+data class EntityDataProviderColumnKey(val column: Column<*>) {
+    /**
+     * @return key Use this value for Vaadin Grid Column key.
+     */
+    val key: String get() = column.name
+    val asc: QuerySortOrder get() = QuerySortOrder(key, SortDirection.ASCENDING)
+    val desc: QuerySortOrder
+        get() = QuerySortOrder(
+            key,
+            SortDirection.DESCENDING
+        )
+}

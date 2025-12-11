@@ -2,6 +2,7 @@ package testapp
 
 import com.github.mvysny.kaributesting.v10.*
 import com.github.mvysny.kaributools.navigateTo
+import com.vaadin.flow.component.grid.Grid
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -39,5 +40,10 @@ class EmployeesRouteTest {
     fun smoke() {
         navigateTo<EmployeesRoute>()
         _expectOne<EmployeesRoute>()
+        _get<Grid<Employee>>().expectRows(112)
+    }
+
+    @Test fun testSorting() {
+        _get<Grid<Employee>>().expectRow(0, "12", "Employee 0", "Employee", "2025-11-12", "6000")
     }
 }
