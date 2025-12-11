@@ -79,7 +79,9 @@ class QueryDataProvider<T>(
     private val Query<T, ColumnDeclaring<Boolean>>.orderBy: List<OrderByExpression> get() {
         val selectExpr = querySource(ActiveKtorm.database).expression
         return sortOrders.map { sortOrder ->
-            var expr: SqlExpression? = tables.mapNotNull { findExpression(it, sortOrder.sorted) } .firstOrNull()
+            var expr: SqlExpression? = tables.firstNotNullOfOrNull {
+                findExpression(it, sortOrder.sorted)
+            }
             if (expr == null) {
                 expr = findExpression(selectExpr, sortOrder.sorted)
             }
