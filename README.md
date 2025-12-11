@@ -64,4 +64,91 @@ Make sure to go through Ktorm documentation to learn how `Entity`-ies and `Table
 We'll bind entities to forms via Vaadin Binder, and we'll return Entity instances via DataProvider,
 so it's crucial that every table has an entity defined.
 
+## EntityDataProvider
+
+The `EntityDataProvider` provides instances of given entity.
+To set the data provider to your Grid:
+
+```kotlin
+val dp: EntityDataProvider<Person> = Persons.dataProvider
+// optionally set an unremovable filter, to always filter the records.
+dp.setFilter(Persons.age gte 18)
+grid.dataProvider = dp
+```
+
+To set the data provider to your ComboBox:
+
+```kotlin
+val dp: EntityDataProvider<Person> = Persons.dataProvider
+// optionally set an unremovable filter, to always filter the records.
+dp.setFilter(Persons.age gte 18)
+comboBox.setDataProvider(dp.withStringFilterOn(Persons.name))
+```
+
+## Grid Sorting
+
+You need to set the Grid Column key to the Ktorm Column name; that way we can reconstruct
+the Property back from Vaadin's QuerySortOrder:
+
+```kotlin
+val idColumn = personGrid.addColumn { it.id }
+        .setHeader("ID")
+        .setSortable(true)
+        .setKey(Persons.id.e.key)
+```
+
+## Grid Filters
+
+One way of adding filters to your grid is to add a Grid header bar just for filter components,
+then add filter components as cells to the header bar:
+
+```kotlin
+// append first header row: the column captions and the sorting indicator will appear here.
+personGrid.appendHeaderRow()
+// the second header row will host filter components.
+val filterBar = personGrid.appendHeaderRow()
+
+val nameFilter = FilterTextField()
+val nameColumn = personGrid.addColumn { it.name }
+        .setHeader("Name")
+        .setSortable(true)
+        .setKey(Persons.name.e.key)
+filterBar.getCell(nameColumn).setComponent(nameFilter)
+nameFilter.addValueChangeListener { updateFilter() }
+```
+
+Then, when any of the filter component
+changes, you need to calculate the `ColumnDeclaring<?>` from the values of all filters as follows:
+
+```kotlin
+private fun update() {
+    val conditions = mutableListOf<ColumnDeclaring<Boolean>?>()
+    if (nameFilter.value.isNotBlank()) {
+        conditions += Employees.name.ilike(nameFilter.value.trim() + "%")
+    }
+    if (jobFilter.value.isNotBlank()) {
+        conditions += Employees.job.ilike(jobFilter.value.trim() + "%")
+    }
+    conditions += Employees.hireDate.between(hireDateFilter.value)
+    conditions += Employees.salary.between(salaryFilter.value.asLongInterval())
+    dataProvider.setFilter(conditions.and())
+}
+```
+
+Alternatively, you might have a `FilterBean` populated by the dialog. Whenever the "Apply" button
+of the dialog is pressed, you populate the FilterBean from the components; you can then
+calculate the `ColumnDeclaring` from the bean in a similar way as above.
+
+See the bundled `testapp` example
+project for more details.
+
+This project offers additional filter components:
+
+* `BooleanFilterField`: allows the user to select `true` or `false` or clear the selection and disable this filter.
+* `EnumFilterField`: allows the user to select one or more enum constants. If all constants or no constant is selected, the filter is disabled.
+* `FilterTextField`: a simple TextField filter. Usually matched with a column using the `likeIgnoreCase()` operator.
+* `DateRangePopup`: allows the user to select a date range. The range may be open (only the 'from' or 'to' date filled in, but not both). Usually matched using the `between()` operator.
+* `NumberRangePopup`: allows the user to select a numeric range. The range may be open (only the 'from' or 'to' number filled in, but not both). Usually matched using the `between()` operator.
+
+
 TODO more
