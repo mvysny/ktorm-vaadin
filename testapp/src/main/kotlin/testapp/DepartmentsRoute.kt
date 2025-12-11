@@ -1,13 +1,7 @@
 package testapp
 
-import com.github.mvysny.karibudsl.v10.KComposite
-import com.github.mvysny.karibudsl.v10.columnFor
-import com.github.mvysny.karibudsl.v10.grid
-import com.github.mvysny.karibudsl.v10.h1
-import com.github.mvysny.karibudsl.v10.isExpand
-import com.github.mvysny.karibudsl.v10.verticalLayout
+import com.github.mvysny.karibudsl.v10.*
 import com.github.mvysny.kaributools.asc
-import com.github.mvysny.kaributools.desc
 import com.github.mvysny.kaributools.sort
 import com.github.mvysny.ktormvaadin.and
 import com.github.mvysny.ktormvaadin.dataProvider
@@ -20,7 +14,7 @@ import com.vaadin.flow.router.Route
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.support.postgresql.ilike
 
-@Route("departments")
+@Route("departments", layout = MainLayout::class)
 class DepartmentsRoute : KComposite() {
     private val idFilter = NumberRangePopup()
     private val nameFilter = FilterTextField("name_filter")
@@ -30,7 +24,7 @@ class DepartmentsRoute : KComposite() {
     val root = ui {
         verticalLayout {
             setSizeFull()
-            h1("Departments")
+            h2("Departments")
             grid<Department>(dataProvider) {
                 setWidthFull(); isExpand = true
                 setMultiSort(true, Grid.MultiSortPriority.APPEND, true)
