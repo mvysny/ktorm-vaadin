@@ -84,17 +84,43 @@ val dp: EntityDataProvider<Person> = Persons.dataProvider
 dp.setFilter(Persons.age gte 18)
 comboBox.setDataProvider(dp.withStringFilterOn(Persons.name))
 ```
+## Joins via `QueryDataProvider`
+
+When using [Ktorm Reference Bindings](https://www.ktorm.org/en/entity-finding.html#get-entities-by-sequences),
+you can use `EntityDataProvider` to select one main entity and then reference all left-joined columns
+in where clauses. Unfortunately the values won't be populated; for example when selecting `Employee`s
+from Ktorm documentation, reading `Employee.department.name` will yield `null`. That's
+where `QueryDataProvider` comes to play.
+
+To hold a join of `Person` and `Address`:
+```kotlin
+data class PersonAddress(val person: Person, val address: Address) {
+    companion object {
+        fun from(row: QueryRowSet): PersonAddress = PersonAddress(
+            Persons.createEntity(row), Addresses.createEntity(row)
+        )
+        val dataProvider: QueryDataProvider<PersonAddress> get() = QueryDataProvider(
+            listOf(Addresses, Persons),
+            { it.from(Addresses).leftJoin(Persons, on = Addresses.of_person_id eq Persons.id) },
+            { it.select(*Addresses.columns.toTypedArray(), *Persons.columns.toTypedArray())},
+            { from(it) }
+        )
+    }
+    override fun toString(): String = "${person.name}/${person.age}=${address.street}/${address.city}"
+}
+```
 
 ## Grid Sorting
 
 You need to set the Grid Column key to the Ktorm Column name; that way we can reconstruct
-the Property back from Vaadin's QuerySortOrder:
+the Ktorm expression back from Vaadin's QuerySortOrder:
 
 ```kotlin
 val idColumn = personGrid.addColumn { it.id }
         .setHeader("ID")
         .setSortable(true)
-        .setKey(Persons.id.e.key)
+        .setKey(Persons.id.e.key) // When using EntityDataProvider
+    .setKey(Persons.id.q.key) // When using QueryDataProvider
 ```
 
 ## Grid Filters
@@ -149,6 +175,5 @@ This project offers additional filter components:
 * `FilterTextField`: a simple TextField filter. Usually matched with a column using the `likeIgnoreCase()` operator.
 * `DateRangePopup`: allows the user to select a date range. The range may be open (only the 'from' or 'to' date filled in, but not both). Usually matched using the `between()` operator.
 * `NumberRangePopup`: allows the user to select a numeric range. The range may be open (only the 'from' or 'to' number filled in, but not both). Usually matched using the `between()` operator.
-
 
 TODO more
