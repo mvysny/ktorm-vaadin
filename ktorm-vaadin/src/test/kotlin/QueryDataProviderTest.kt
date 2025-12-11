@@ -51,12 +51,18 @@ class QueryDataProviderTest : AbstractDbTest() {
         ) { e.fetchAll().subList(0, 2).map { it.toString() } }
     }
 
-//    @Test
-//    fun sortingByName() {
-//        val p = e.fetchSortBy(Persons.name.e.asc)
-//        expect(10) { p.size }
-//        expectList("test 1", "test 10", "test 2", "test 3", "test 4", "test 5", "test 6", "test 7", "test 8", "test 9") { p.map { it.name } }
-//    }
+    @Test
+    fun sortingByStreet() {
+        val p = e.fetchSortBy(Addresses.street.e.desc)
+        expect(10) { p.size }
+        expectList("test 10/9=street 9/city 9", "test 9/8=street 8/city 8") { p.take(2).map { it.toString() } }
+    }
+    @Test
+    fun sortingByName() {
+        val p = e.fetchSortBy(Persons.name.e.desc)
+        expect(10) { p.size }
+        expectList("test 10/9=street 9/city 9", "test 9/8=street 8/city 8") { p.take(2).map { it.toString() } }
+    }
 //    @Test
 //    fun sortingByNameDesc() {
 //        val p = e.fetchSortBy(Persons.name.e.desc)

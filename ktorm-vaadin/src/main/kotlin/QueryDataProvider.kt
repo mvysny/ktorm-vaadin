@@ -14,6 +14,7 @@ import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.schema.Table
 import org.ktorm.support.postgresql.ilike
 import java.util.stream.Stream
+import kotlin.collections.map
 
 /**
  * Loads data from a ktorm [Query]. Mostly used for more complex stuff like joins; for selecting
@@ -46,8 +47,13 @@ class QueryDataProvider<T>(val querySource: (Database) -> QuerySource, val query
 
     private val Query<T, ColumnDeclaring<Boolean>>.orderBy: List<OrderByExpression> get() {
         return sortOrders.map { sortOrder ->
+            val table =querySource(ActiveKtorm.database).sourceTable
             // @TODO this only takes the first table into account!
-            val column = querySource(ActiveKtorm.database).sourceTable[sortOrder.sorted]
+            val column = try {
+                table[sortOrder.sorted]
+            } catch (e: NoSuchElementException) {
+                throw RuntimeException("No column with name ${sortOrder.sorted}. Available column names: ${table.columns.map { it.name }}", e)
+            }
             if (sortOrder.direction == SortDirection.ASCENDING) column.asc() else column.desc()
         }
     }

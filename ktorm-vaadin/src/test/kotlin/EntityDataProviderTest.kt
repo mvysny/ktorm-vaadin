@@ -113,10 +113,10 @@ class EntityDataProviderTest : AbstractDbTest() {
     }
 }
 
-internal fun DataProvider<Person, *>.fetchSortBy(vararg qs: QuerySortOrder): List<Person> = fetchFilter(sortOrders = qs.toList())
-internal fun <F> DataProvider<Person, F>.fetchFilter(f: F? = null, offset: Int = 0, limit: Int = Int.MAX_VALUE, sortOrders: List<QuerySortOrder> = listOf(Persons.name.e.asc)): List<Person> = fetch(Query(
+internal fun <T> DataProvider<T, *>.fetchSortBy(vararg qs: QuerySortOrder): List<T> = fetchFilter(sortOrders = qs.toList())
+internal fun <T, F> DataProvider<T, F>.fetchFilter(f: F? = null, offset: Int = 0, limit: Int = Int.MAX_VALUE, sortOrders: List<QuerySortOrder> = listOf()): List<T> = fetch(Query(
     offset, limit, sortOrders, null, f
 )).toList()
-internal fun <F> DataProvider<Person, F>.sizeFilter(f: F? = null): Int = size(Query(
+internal fun <F> DataProvider<*, F>.sizeFilter(f: F? = null): Int = size(Query(
     0, Int.MAX_VALUE, listOf(), null, f
 ))
