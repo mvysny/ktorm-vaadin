@@ -16,6 +16,7 @@ import com.github.mvysny.ktormvaadin.filter.DateRangePopup
 import com.github.mvysny.ktormvaadin.filter.FilterTextField
 import com.github.mvysny.ktormvaadin.filter.NumberRangePopup
 import com.github.mvysny.ktormvaadin.filter.between
+import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.router.Route
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.support.postgresql.ilike
@@ -35,7 +36,7 @@ class EmployeesRoute : KComposite() {
             h1("Employees")
             grid<Employee>(dataProvider) {
                 setWidthFull(); isExpand = true
-                isMultiSort = true
+                setMultiSort(true, Grid.MultiSortPriority.APPEND, true)
                 appendHeaderRow()
                 val filterBar = prependHeaderRow()
                 columnFor(Employee::id, key = Employees.id.e.key) {

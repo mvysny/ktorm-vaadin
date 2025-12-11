@@ -15,6 +15,7 @@ import com.github.mvysny.ktormvaadin.e
 import com.github.mvysny.ktormvaadin.filter.FilterTextField
 import com.github.mvysny.ktormvaadin.filter.NumberRangePopup
 import com.github.mvysny.ktormvaadin.filter.between
+import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.router.Route
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.support.postgresql.ilike
@@ -32,7 +33,7 @@ class DepartmentsRoute : KComposite() {
             h1("Departments")
             grid<Department>(dataProvider) {
                 setWidthFull(); isExpand = true
-                isMultiSort = true
+                setMultiSort(true, Grid.MultiSortPriority.APPEND, true)
                 appendHeaderRow()
                 val filterBar = prependHeaderRow()
                 columnFor(Department::id, key = Departments.id.e.key) {
@@ -63,11 +64,12 @@ class DepartmentsRoute : KComposite() {
 
     private fun update() {
        val conditions = mutableListOf<ColumnDeclaring<Boolean>?>()
+        conditions += Departments.id.between(idFilter.value.asIntegerInterval())
         if (nameFilter.value.isNotBlank()) {
-            conditions += Employees.name.ilike(nameFilter.value.trim() + "%")
+            conditions += Departments.name.ilike(nameFilter.value.trim() + "%")
         }
         if (locationFilter.value.isNotBlank()) {
-            conditions += Employees.job.ilike(locationFilter.value.trim() + "%")
+            conditions += Departments.location.ilike(locationFilter.value.trim() + "%")
         }
         dataProvider.setFilter(conditions.and())
     }

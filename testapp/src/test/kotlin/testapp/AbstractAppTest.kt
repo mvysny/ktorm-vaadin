@@ -26,7 +26,6 @@ abstract class AbstractAppTest {
     @BeforeEach
     fun setupVaadin() {
         MockVaadin.setup(routes)
-        demoData()
     }
 
     @AfterEach

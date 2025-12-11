@@ -15,30 +15,31 @@ class DepartmentsRouteTest : AbstractAppTest() {
     fun smoke() {
         navigateTo<DepartmentsRoute>()
         _expectOne<DepartmentsRoute>()
-        _get<Grid<Department>>().expectRows(112)
+        _get<Grid<Department>>().expectRows(101)
+        _get<Grid<Department>>().expectRowRegex(0, "\\d+", "Dept 0", "Somewhere 0")
     }
 
     @Test
     fun testNameFilter() {
         navigateTo<DepartmentsRoute>()
-        _get<TextField> { id = "name_filter" }._value = "Manager 1"
-        _get<Grid<Department>>().expectRow(0, "2", "Manager 1", "Manager", "2025-11-12", "6001")
-        _get<Grid<Department>>().expectRows(2)
+        _get<TextField> { id = "name_filter" }._value = "Dept 1"
+        _get<Grid<Department>>().expectRowRegex(0, "\\d+", "Dept 1", "Somewhere 1")
+        _get<Grid<Department>>().expectRows(12)
     }
 
     @Test
-    fun testJobFilter() {
+    fun testLocationFilter() {
         navigateTo<DepartmentsRoute>()
-        _get<TextField> { id = "job_filter" }._value = "Manager"
-        _get<Grid<Department>>().expectRow(0, "1", "Manager 0", "Manager", "2025-11-12", "6000")
+        _get<TextField> { id = "location_filter" }._value = "Somewhere 2"
+        _get<Grid<Department>>().expectRowRegex(0, "\\d+", "Dept 2", "Somewhere 2")
         _get<Grid<Department>>().expectRows(11)
     }
 
     @Test
     fun testNameAndJobFilter() {
         navigateTo<DepartmentsRoute>()
-        _get<TextField> { id = "name_filter" }._value = "Department"
-        _get<TextField> { id = "job_filter" }._value = "Manager"
+        _get<TextField> { id = "name_filter" }._value = "Dept 1"
+        _get<TextField> { id = "location_filter" }._value = "Somewhere 2"
         _get<Grid<Department>>().expectRows(0)
     }
 
