@@ -90,7 +90,7 @@ When using [Ktorm Reference Bindings](https://www.ktorm.org/en/entity-finding.ht
 you can use `EntityDataProvider` to select one main entity and then reference all left-joined columns
 in where clauses. Unfortunately the values won't be populated; for example when selecting `Employee`s
 from Ktorm documentation, reading `Employee.department.name` will yield `null`. That's
-where `QueryDataProvider` comes to play.
+where `QueryDataProvider` comes into play.
 
 To hold a join of `Person` and `Address`:
 ```kotlin
@@ -176,4 +176,10 @@ This project offers additional filter components:
 * `DateRangePopup`: allows the user to select a date range. The range may be open (only the 'from' or 'to' date filled in, but not both). Usually matched using the `between()` operator.
 * `NumberRangePopup`: allows the user to select a numeric range. The range may be open (only the 'from' or 'to' number filled in, but not both). Usually matched using the `between()` operator.
 
-TODO more
+## Further Documentation
+
+This project contains a bundled app named `testapp`. You can run it easily:
+```bash
+$ ./gradlew testapp:run
+```
+The sources are simple and easy to follow and demo all features of ktorm-vaadin.
