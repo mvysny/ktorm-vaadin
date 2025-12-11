@@ -75,19 +75,19 @@ class QueryDataProviderTest : AbstractDbTest() {
         expect(1) { e.sizeFilter(Persons.age eq 5) }
         expectList("test 6/5=street 5/city 5") { e.fetchFilter(Persons.age eq 5).map { it.toString() } }
     }
-//    @Test
-//    fun queryBothFilters() {
-//        e.setFilter(Persons.age lte 7)
-//        expect(5) { e.sizeFilter(Persons.age gte 3) }
-//        expectList("test 4", "test 5", "test 6", "test 7", "test 8") { e.fetchFilter(Persons.age gte 3).map { it.name } }
-//    }
-//    @Test
-//    fun queryAll() {
-//        e.setFilter(Persons.age lte 7)
-//        expect(5) { e.sizeFilter(Persons.age gte 3) }
-//        expectList("test 5", "test 6") { e.fetchFilter(Persons.age gte 3, 1, 2).map { it.name } }
-//        expectList("test 7", "test 6") { e.fetchFilter(Persons.age gte 3, 1, 2, listOf(Persons.age.e.desc)).map { it.name } }
-//    }
+    @Test
+    fun queryBothFilters() {
+        e.setFilter(Persons.age lte 5)
+        expect(1) { e.sizeFilter(Persons.age gte 5) }
+        expectList("test 6/5=street 5/city 5") { e.fetchFilter(Persons.age gte 5).map { it.toString() } }
+    }
+    @Test
+    fun queryAll() {
+        e.setFilter(Persons.age lte 7)
+        expect(5) { e.sizeFilter(Persons.age gte 3) }
+        expectList("test 5/4=street 4/city 4", "test 6/5=street 5/city 5") { e.fetchFilter(Persons.age gte 3, 1, 2).map { it.toString() } }
+        expectList("test 7/6=street 6/city 6", "test 6/5=street 5/city 5") { e.fetchFilter(Persons.age gte 3, 1, 2, listOf(Persons.age.q.desc)).map { it.toString() } }
+    }
 //    @Test
 //    fun stringFilter() {
 //        val dp = e.withStringFilterOn(Persons.name)
