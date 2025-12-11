@@ -108,20 +108,3 @@ fun <T: Entity<T>> EntityDataProvider<T>.withStringFilterOn(column: Column<Strin
         column.ilike("${it.trim()}%")
     }
 
-/**
- * A type-safe binding which binds only to a property of given type, found on given bean.
- * @param column the ktorm column
- */
-fun <BEAN, FIELDVALUE:Any> Binder.BindingBuilder<BEAN, FIELDVALUE?>.bind(column: Column<out FIELDVALUE>): Binder.Binding<BEAN, FIELDVALUE?> {
-    val binding: KProperty1<*, *> = column.property
-
-    // oh crap, don't use binding by getter and setter - validations won't work!
-    // we need to use bind(String) even though that will use undebuggable crappy Java 8 lambdas :-(
-    //        bind({ bean -> prop.get(bean) }, { bean, value -> prop.set(bean, value) })
-    var name = binding.name
-    if (name.startsWith("is")) {
-        // Kotlin KProperties named "isFoo" are represented with just "foo" in the bean property set
-        name = name[2].lowercase() + name.drop(3)
-    }
-    return bind(name)
-}
