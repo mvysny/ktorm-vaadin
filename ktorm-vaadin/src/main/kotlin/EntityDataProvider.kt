@@ -124,9 +124,5 @@ data class EntityDataProviderColumnKey(val column: Column<*>) {
      */
     val key: String get() = column.name
     val asc: QuerySortOrder get() = QuerySortOrder(key, SortDirection.ASCENDING)
-    val desc: QuerySortOrder
-        get() = QuerySortOrder(
-            key,
-            SortDirection.DESCENDING
-        )
+    val desc: QuerySortOrder get() = QuerySortOrder(key, SortDirection.DESCENDING)
 }

@@ -174,9 +174,5 @@ data class QueryDataProviderColumnKey(val column: Column<*>) {
      */
     val key: String get() = column.asExpression().toString()
     val asc: QuerySortOrder get() = QuerySortOrder(key, SortDirection.ASCENDING)
-    val desc: QuerySortOrder
-        get() = QuerySortOrder(
-            key,
-            SortDirection.DESCENDING
-        )
+    val desc: QuerySortOrder get() = QuerySortOrder(key, SortDirection.DESCENDING)
 }
