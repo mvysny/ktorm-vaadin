@@ -2,9 +2,12 @@
 vaadin = "24.9.6"
 # https://repo1.maven.org/maven2/org/slf4j/slf4j-api/
 slf4j = "2.0.17"
+ktorm = "4.1.1"
 
 [libraries]
-ktorm = "org.ktorm:ktorm-core:4.1.1"
+ktorm-core = { module = "org.ktorm:ktorm-core", version.ref = "ktorm" }
+# To add ilike support
+ktorm-postgresql = { module = "org.ktorm:ktorm-support-postgresql", version.ref = "ktorm" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 vaadin-core = { module = "com.vaadin:vaadin-core", version.ref = "vaadin" }
@@ -21,3 +24,6 @@ flyway = "org.flywaydb:flyway-core:11.18.0"  # https://repo1.maven.org/maven2/or
 
 [plugins]
 vaadin = { id = "com.vaadin", version.ref = "vaadin" }
+
+[bundles]
+ktorm = ["ktorm-core", "ktorm-postgresql"]

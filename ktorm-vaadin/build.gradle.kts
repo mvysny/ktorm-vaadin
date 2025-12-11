@@ -1,6 +1,6 @@
 dependencies {
     implementation(libs.slf4j.api)
-    api(libs.ktorm)
+    api(libs.bundles.ktorm)
     compileOnly(libs.vaadin.core)
     testImplementation(libs.vaadin.core)
     api(libs.hibernate.validator)
