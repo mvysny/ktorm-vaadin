@@ -189,18 +189,12 @@ data class QueryDataProviderColumnKey(val column: Column<*>) {
     val desc: QuerySortOrder get() = QuerySortOrder(key, SortDirection.DESCENDING)
 }
 
-internal fun <T : Any> ColumnDeclaring<T>.asDeclaringExpression(): ColumnDeclaringExpression<T> {
-    return when (this) {
-        is ColumnDeclaringExpression -> this
-        is Column -> this.aliased(label)
-        else -> this.aliased(null)
-    }
-}
-
+/**
+ * Turns this query into a count query. The new query only has one Int column.
+ */
 fun org.ktorm.dsl.Query.countQuery(): org.ktorm.dsl.Query {
-    val columns = listOf(count())
-    val declarations = columns.map { it.asDeclaringExpression() }
+    val columns = listOf(count().aliased(null))
     var expr = expression as SelectExpression
-    expr = expr.copy(columns = declarations)
+    expr = expr.copy(columns = columns)
     return Query(database, expr)
 }
