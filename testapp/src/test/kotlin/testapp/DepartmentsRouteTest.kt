@@ -50,6 +50,7 @@ class DepartmentsRouteTest : AbstractAppTest() {
         grid.columns.filter { it.isSortable } .forEach {
             grid.sort(listOf(GridSortOrder(it, SortDirection.DESCENDING)))
             grid.expectRows(101)
+            grid._findAll()
         }
     }
 }

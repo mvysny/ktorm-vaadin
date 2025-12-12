@@ -55,6 +55,7 @@ class EmployeesRouteTest : AbstractAppTest() {
         grid.columns.filter { it.isSortable } .forEach {
             grid.sort(listOf(GridSortOrder(it, SortDirection.DESCENDING)))
             grid.expectRows(112)
+            grid._findAll()
         }
     }
 }
