@@ -181,8 +181,11 @@ Ktorm entities are interfaces, but have all the usual getters/setters so that th
 with the Binder. However, make sure to have Hibernate-Validator 9+ since HV 8
 [doesn't run validators on interfaces](https://hibernate.atlassian.net/browse/HV-2018).
 
-- TODO how to implement a Department picker ComboBox and bind it to an ID field.
-- TODO verify that left-joined fields aren't populated
+A very simple example of an employee form:
+
+```kotlin
+
+```
 
 ## Further Documentation
 
