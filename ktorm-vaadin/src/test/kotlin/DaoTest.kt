@@ -12,7 +12,7 @@ import kotlin.test.expect
 class DaoTest : AbstractDbTest() {
     @BeforeEach
     fun prepareTestData() {
-        Persons.create()
+        Persons.ddl()
     }
 
     @AfterEach

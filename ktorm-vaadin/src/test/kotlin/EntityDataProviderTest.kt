@@ -22,7 +22,7 @@ class EntityDataProviderTest : AbstractDbTest() {
 
     @BeforeEach
     fun prepareTestData() {
-        Persons.create()
+        Persons.ddl()
         db {
             repeat(10) {
                 Person { name = "test ${it + 1}"; age = it }.save()

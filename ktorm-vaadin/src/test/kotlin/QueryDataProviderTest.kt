@@ -30,7 +30,7 @@ class QueryDataProviderTest : AbstractDbTest() {
     private val e = PersonAddress.dataProvider
     @BeforeEach
     fun prepareTestData() {
-        Persons.create()
+        Persons.ddl()
         Addresses.ddl()
         db {
             repeat(10) {

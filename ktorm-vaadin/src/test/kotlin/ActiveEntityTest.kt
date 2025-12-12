@@ -18,7 +18,7 @@ import kotlin.test.expect
 
 class ActiveEntityTest : AbstractDbTest() {
     @BeforeEach fun prepareTestData() {
-        Persons.create()
+        Persons.ddl()
     }
 
     @AfterEach fun tearDownTestData() {
@@ -61,10 +61,12 @@ class ActiveEntityTest : AbstractDbTest() {
 }
 
 object Persons : Table<Person>("person") {
+    // important: keep the property name "id" lowercase while keeping the column name uppercase.
+    // This tests that EntityToIdConverter uses the right naming for value retrieval.
     val id = int("ID").primaryKey().bindTo { it.id }
     val name = varchar("NAME").bindTo { it.name }
     val age = int("AGE").bindTo { it.age }
-    fun create() {
+    fun ddl() {
         db { ddl("create table person (id int not null primary key auto_increment, name varchar(255) not null, age int not null)") }
     }
 }

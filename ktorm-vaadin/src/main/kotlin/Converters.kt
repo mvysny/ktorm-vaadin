@@ -25,7 +25,7 @@ class EntityToIdConverter<ID: Any, T: Entity<T>>(val idColumn: Column<ID>, val e
     }
 
     override fun convertToModel(value: T?, context: ValueContext?): Result<ID?> =
-        Result.ok(value?.get(idColumn.name) as ID?)
+        Result.ok(value?.get(idColumn.property.name) as ID?)
 
     override fun convertToPresentation(value: ID?, context: ValueContext?): T? {
         if (value == null) return null
