@@ -185,7 +185,42 @@ A very simple example of an employee form:
 
 ```kotlin
 
+class EmployeeForm : FormLayout(), HasBinder<Employee> {
+    override val binder = beanValidationBinder<Employee>()
+    init {
+        textField("Name") {
+            setId("name")
+            bind(binder).bind(Employees.name)
+        }
+        textField("Job") {
+            setId("job")
+            bind(binder).bind(Employees.job)
+        }
+        comboBox<Employee>("Manager") {
+            setId("manager")
+            setItems(Employees.dataProvider.withStringFilterOn(Employees.name))
+            itemLabelGenerator = ItemLabelGenerator { it.name }
+            bind(binder).toId(Employees.id).bind(Employees.managerId)
+        }
+        datePicker("Hire Date") {
+            setId("hireDate")
+            bind(binder).bind(Employees.hireDate)
+        }
+        integerField("Salary") {
+            setId("salary")
+            bind(binder).withConverter(IntegerToLongConverter()).bind(Employees.salary)
+        }
+        comboBox<Department>("Department") {
+            setId("department")
+            setItems(Departments.dataProvider.withStringFilterOn(Departments.name))
+            itemLabelGenerator = ItemLabelGenerator { it.name }
+            bind(binder).toId(Departments.id).bind(Employees.departmentId)
+        }
+    }
+}
 ```
+Notice how the Manager and Department ComboBoxes populate themselves, and how they
+bind to an `Int` field which holds the ID of the manager/department.
 
 ## Further Documentation
 
