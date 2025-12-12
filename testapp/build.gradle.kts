@@ -10,7 +10,7 @@ dependencies {
     implementation(libs.vaadin.core)
     implementation(libs.karibu.dsl)
     implementation(libs.vaadinboot)
-    api("com.github.mvysny.karibu-tools:karibu-tools:0.25")
+    api("com.github.mvysny.karibu-tools:karibu-tools-23:0.25")
 
     implementation(libs.slf4j.simple)
     implementation(libs.hikaricp)

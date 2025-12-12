@@ -11,6 +11,7 @@ import com.github.mvysny.ktormvaadin.filter.FilterTextField
 import com.github.mvysny.ktormvaadin.filter.NumberRangePopup
 import com.github.mvysny.ktormvaadin.filter.between
 import com.github.mvysny.ktormvaadin.q
+import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.router.Route
 import org.ktorm.dsl.QueryRowSet
@@ -43,43 +44,44 @@ class EmployeesRoute : KComposite() {
                 setMultiSort(true, Grid.MultiSortPriority.APPEND, true)
                 appendHeaderRow()
                 val filterBar = prependHeaderRow()
-                column({ it.e.id }) {
+                column({ it.employee.id }) {
                     setHeader("ID")
                     key = Employees.id.q.key
                     isSortable = true
                     filterBar.getCell(this).component = idFilter
                 }
-                val nameCol = column({ it.e.name }) {
+                val nameCol = column({ it.employee.name }) {
                     setHeader("Name")
                     key = Employees.name.q.key
                     isSortable = true
                     filterBar.getCell(this).component = nameFilter
                 }
-                column({ it.e.job}) {
+                column({ it.employee.job}) {
                     setHeader("Job")
                     key = Employees.job.q.key
                     isSortable = true
                     filterBar.getCell(this).component = jobFilter
                 }
-                column({ it.e.hireDate }) {
+                column({ it.employee.hireDate }) {
                     setHeader("Hire date")
                     key = Employees.hireDate.q.key
                     isSortable = true
                     filterBar.getCell(this).component = hireDateFilter
                 }
-                val salaryCol = column({ it.e.salary }) {
+                val salaryCol = column({ it.employee.salary }) {
                     setHeader("Salary")
                     key = Employees.salary.q.key
                     isSortable = true
                     filterBar.getCell(this).component = salaryFilter
                 }
-                column({ it.d.name }) {
+                column({ it.department.name }) {
                     setHeader("Department")
                     key = Departments.name.q.key
                     isSortable = true
                     filterBar.getCell(this).component = deptFilter
                 }
                 sort(nameCol.asc, salaryCol.desc)
+                addItemClickListener { if (it.item != null) edit(it.item) }
             }
         }
     }
@@ -109,9 +111,15 @@ class EmployeesRoute : KComposite() {
         }
         dataProvider.setFilter(conditions.and())
     }
+
+    private fun edit(bean: EmployeeDept) {
+        EntityEditDialog(bean.employee, "employee ${bean.employee.name}", EmployeeForm()) {
+            dataProvider.refreshAll()
+        } .open()
+    }
 }
 
-data class EmployeeDept(val e: Employee, val d: Department) {
+data class EmployeeDept(val employee: Employee, val department: Department) {
     companion object {
         fun from(row: QueryRowSet): EmployeeDept = EmployeeDept(
             Employees.createEntity(row), Departments.createEntity(row)
@@ -121,5 +129,12 @@ data class EmployeeDept(val e: Employee, val d: Department) {
                 .select(*Employees.columns.toTypedArray(), *Departments.columns.toTypedArray()) },
             { from(it) }
         )
+    }
+}
+
+class EmployeeForm : FormLayout(), HasBinder<Employee> {
+   override val binder = beanValidationBinder<Employee>()
+    init {
+        throw RuntimeException("Unimplemented")
     }
 }

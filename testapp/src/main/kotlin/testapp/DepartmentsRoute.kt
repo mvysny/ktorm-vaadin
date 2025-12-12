@@ -51,6 +51,7 @@ class DepartmentsRoute : KComposite() {
                     filterBar.getCell(this).component = locationFilter
                 }
                 sort(nameCol.asc)
+                addItemClickListener { if (it.item != null) edit(it.item) }
             }
         }
     }
@@ -72,13 +73,19 @@ class DepartmentsRoute : KComposite() {
         }
         dataProvider.setFilter(conditions.and())
     }
+
+    private fun edit(bean: Department) {
+        EntityEditDialog(bean, "department ${bean.name}", DepartmentForm()) {
+            dataProvider.refreshAll()
+        } .open()
+    }
 }
 
 /**
  * Edits the [Department] bean.
  */
-class DepartmentForm : FormLayout() {
-    val binder = beanValidationBinder<Department>()
+class DepartmentForm : FormLayout(), HasBinder<Department> {
+    override val binder = beanValidationBinder<Department>()
     init {
         textField("Name") {
             setId("name")
