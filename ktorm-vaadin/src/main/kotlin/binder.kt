@@ -1,6 +1,7 @@
 package com.github.mvysny.ktormvaadin
 
 import com.vaadin.flow.data.binder.Binder
+import org.ktorm.entity.Entity
 import org.ktorm.schema.Column
 import kotlin.reflect.KProperty1
 
@@ -24,3 +25,23 @@ fun <BEAN, FIELDVALUE:Any> Binder.BindingBuilder<BEAN, FIELDVALUE?>.bind(column:
     }
     return bind(name)
 }
+
+/**
+ * Converts an entity to its ID and back. Useful for combo boxes which shows a list of entities as their options while being bound to a
+ * field containing ID of that entity:
+ * ```kotlin
+ * interface Category(override var id: Long? = null, var name: String = "") : Entity<Long>
+ * interface Review(override var id: Long? = null, var category: Long? = null) : Entity<Long>
+ *
+ * // editing the Review, we want the user to be able to choose the Review's category
+ * val binder = BeanValidationBinder(Review::class.java)
+ * categoryBox = comboBox("Choose a category") {
+ *     setItemLabelGenerator { it.name }
+ *     isAllowCustomValue = false
+ *     dataProvider = Categories.dataProvider
+ *     bind(binder).toId().bind(Reviews.category)
+ * }
+ * ```
+ */
+inline fun <BEAN, ID: Any, reified ENTITY: Entity<ENTITY>> Binder.BindingBuilder<BEAN, ENTITY?>.toId(idColumn: Column<ID>): Binder.BindingBuilder<BEAN, ID?> =
+    withConverter(EntityToIdConverter(idColumn, ENTITY::class))
