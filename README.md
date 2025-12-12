@@ -4,7 +4,8 @@
 forms via Vaadin binder, listing them in Grids and ComboBoxes via DataProvider,
 and listing the outcomes of SQL selects/joins in a Grid.
 
-> Note: work in progress. The code will be ported from the example app [beverage-buddy-ktorm](https://github.com/mvysny/beverage-buddy-ktorm).
+Check out the example app [beverage-buddy-ktorm](https://github.com/mvysny/beverage-buddy-ktorm) to
+see this stuff in action.
 
 ## Adding to your project
 
