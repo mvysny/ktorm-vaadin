@@ -88,7 +88,7 @@ comboBox.setDataProvider(dp.withStringFilterOn(Persons.name))
 
 When using [Ktorm Reference Bindings](https://www.ktorm.org/en/entity-finding.html#get-entities-by-sequences),
 you can use `EntityDataProvider` to select one main entity and then reference all left-joined columns
-in where clauses. Unfortunately the values won't be populated; for example when selecting `Employee`s
+in where clauses. Unfortunately the values of joined entities do not seem to be populated; for example when selecting `Employee`s
 from Ktorm documentation, reading `Employee.department.name` will yield `null`. That's
 where `QueryDataProvider` comes into play.
 
@@ -178,7 +178,8 @@ This project offers additional filter components:
 
 ## Forms
 
-TODO how to implement a Department picker ComboBox.
+- TODO how to implement a Department picker ComboBox and bind it to an ID field.
+- TODO verify that left-joined fields aren't populated
 
 ## Further Documentation
 
