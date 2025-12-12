@@ -1,5 +1,6 @@
 package com.github.mvysny.ktormvaadin
 
+import com.github.mvysny.kaributesting.v10._value
 import com.vaadin.flow.component.combobox.ComboBox
 import com.vaadin.flow.component.textfield.IntegerField
 import com.vaadin.flow.component.textfield.TextField
@@ -82,6 +83,21 @@ class BinderTests {
             val address = Address { of_person_id = person.id }
             form.binder.readBean(address)
             expect(person) { form.personPicker.value }
+        }
+        @Test fun writeBeanSetsNullPersonId() {
+            val form = AddressForm()
+            form.streetField._value = "foo"
+            val address = Address { of_person_id = person.id }
+            form.binder.writeBean(address)
+            expect(null) { address.of_person_id }
+        }
+        @Test fun writeBeanSetsPersonId() {
+            val form = AddressForm()
+            form.streetField._value = "foo"
+            form.personPicker._value = person
+            val address = Address {}
+            form.binder.writeBean(address)
+            expect(person.id) { address.of_person_id }
         }
     }
 }
