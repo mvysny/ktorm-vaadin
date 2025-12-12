@@ -12,8 +12,6 @@ import com.github.mvysny.ktormvaadin.filter.NumberRangePopup
 import com.github.mvysny.ktormvaadin.filter.between
 import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.grid.Grid
-import com.vaadin.flow.component.masterdetaillayout.MasterDetailLayout
-import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.router.Route
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.support.postgresql.ilike
