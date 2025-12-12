@@ -14,7 +14,7 @@ defaultTasks("clean", "build")
 
 allprojects {
     group = "com.github.mvysny.ktorm-vaadin"
-    version = "0.1-SNAPSHOT"
+    version = "0.1"
 
     repositories {
         mavenCentral()
