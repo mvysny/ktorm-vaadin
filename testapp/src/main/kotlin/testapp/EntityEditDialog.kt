@@ -6,6 +6,7 @@ import com.github.mvysny.karibudsl.v23.footer
 import com.github.mvysny.karibudsl.v23.openConfirmDialog
 import com.github.mvysny.karibudsl.v23.setCloseOnCancel
 import com.github.mvysny.karibudsl.v23.setConfirmIsDanger
+import com.github.mvysny.kaributools.setDanger
 import com.github.mvysny.kaributools.setPrimary
 import com.github.mvysny.ktormvaadin.ActiveEntity
 import com.vaadin.flow.component.Component
@@ -63,7 +64,7 @@ class EntityEditDialog<E : ActiveEntity<E>>(val entity: E, val entityName: Strin
             }
             if (!isCreating) {
                 button("Delete") {
-                    addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_PRIMARY)
+                    setDanger()
                     onClick { delete() }
                 }
             }
