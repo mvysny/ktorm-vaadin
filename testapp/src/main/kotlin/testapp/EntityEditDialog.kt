@@ -32,10 +32,7 @@ fun <E> HasBinder<E>.save(toEntity: E): Boolean {
     if (binder.validate().isOk && binder.writeBeanIfValid(toEntity)) {
         return true
     } else {
-        Notification.show("There are errors in the form").apply {
-            isAssertive = true
-            addThemeVariants(NotificationVariant.LUMO_ERROR)
-        }
+        showErrorNotification("There are errors in the form")
         return false
     }
 }

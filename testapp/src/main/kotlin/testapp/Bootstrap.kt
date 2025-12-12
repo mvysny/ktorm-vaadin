@@ -1,7 +1,14 @@
 package testapp
 
 import com.github.mvysny.ktormvaadin.ActiveKtorm
+import com.vaadin.flow.component.notification.Notification
+import com.vaadin.flow.component.notification.NotificationVariant
 import com.vaadin.flow.component.page.AppShellConfigurator
+import com.vaadin.flow.server.ErrorHandler
+import com.vaadin.flow.server.ServiceInitEvent
+import com.vaadin.flow.server.SessionInitEvent
+import com.vaadin.flow.server.SessionInitListener
+import com.vaadin.flow.server.VaadinServiceInitListener
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import jakarta.servlet.ServletContextEvent
@@ -13,6 +20,24 @@ import org.slf4j.LoggerFactory
 
 // Required by Vaadin
 class AppShell : AppShellConfigurator
+
+// All this bullshit, just to show error notification if the app throws.
+class MyAppServiceInitListener : VaadinServiceInitListener, SessionInitListener {
+    override fun serviceInit(event: ServiceInitEvent) {
+        event.source.addSessionInitListener(this)
+    }
+
+    override fun sessionInit(event: SessionInitEvent) {
+        event.session.errorHandler = ErrorHandler { errorEvent ->
+            log.error("Internal error", errorEvent.throwable)
+            showErrorNotification("Internal error: ${errorEvent.throwable?.message}")
+        }
+    }
+    companion object {
+        @JvmStatic
+        private val log = LoggerFactory.getLogger(MyAppServiceInitListener::class.java)
+    }
+}
 
 // Called by Jetty before the app starts serving requests, and afterwards when it's killed.
 @WebListener
