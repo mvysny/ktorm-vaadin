@@ -117,7 +117,6 @@ data class EmployeeDept(val e: Employee, val d: Department) {
             Employees.createEntity(row), Departments.createEntity(row)
         )
         val dataProvider: QueryDataProvider<EmployeeDept> get() = QueryDataProvider<EmployeeDept>(
-            listOf(Employees, Departments),
             { it.from(Employees).leftJoin(Departments, on = Employees.departmentId eq Departments.id) },
             { it.select(*Employees.columns.toTypedArray(), *Departments.columns.toTypedArray()) },
             { from(it) }

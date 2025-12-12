@@ -146,7 +146,6 @@ data class PersonAddress(val person: Person, val address: Address) {
             Persons.createEntity(row), Addresses.createEntity(row)
         )
         val dataProvider: QueryDataProvider<PersonAddress> get() = QueryDataProvider(
-            listOf(Addresses, Persons),
             { it.from(Addresses).leftJoin(Persons, on = Addresses.of_person_id eq Persons.id) },
             { it.select(*Addresses.columns.toTypedArray(), *Persons.columns.toTypedArray())},
             { from(it) }

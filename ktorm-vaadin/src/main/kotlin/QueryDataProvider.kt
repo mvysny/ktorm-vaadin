@@ -10,11 +10,14 @@ import com.vaadin.flow.function.SerializableFunction
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import org.ktorm.expression.BinaryExpression
+import org.ktorm.expression.ColumnDeclaringExpression
 import org.ktorm.expression.OrderByExpression
 import org.ktorm.expression.OrderType
 import org.ktorm.expression.ScalarExpression
+import org.ktorm.expression.SelectExpression
 import org.ktorm.expression.SqlExpression
 import org.ktorm.expression.UnaryExpression
+import org.ktorm.expression.UnionExpression
 import org.ktorm.schema.BaseTable
 import org.ktorm.schema.Column
 import org.ktorm.schema.ColumnDeclaring
@@ -28,8 +31,7 @@ import kotlin.collections.map
  * entities use [EntityDataProvider]. Example of use:
  * ```
  * val dp = QueryDataProvider(
- *   listOf(Reviews, Categories),
- *   { it.from(Reviews).leftJoin(Categories, on = Reviews.category eq Categories.id) },
+ *   { it.from(Reviews).leftJoin(Categories, on = Reviews.category eq Categories.id)
  *   { it.select(*Reviews.columns.toTypedArray(), Categories.name)},
  *   { ReviewWithCategory.from(it) })
  * val filter = Reviews.name.ilike(normalizedFilter) or
@@ -41,7 +43,6 @@ import kotlin.collections.map
  * @param T the bean type returned by this data provider.
  */
 class QueryDataProvider<T>(
-    val tables: List<BaseTable<*>>,
     val querySource: (Database) -> QuerySource,
     val query: (QuerySource) -> org.ktorm.dsl.Query,
     val rowMapper: (QueryRowSet) -> T
@@ -58,19 +59,39 @@ class QueryDataProvider<T>(
         return filter.and(filter2)
     }
 
-    private fun findExpression(expr: SqlExpression, toString: String): SqlExpression? {
+    /**
+     * Walks through the tree of expressions and finds the one whose [Any.toString]
+     * is identical to [toString]. In other words, we're trying to reconstruct a Ktorm
+     * expression from a string representation.
+     * @param expr the expression tree to examine
+     * @param toString we're trying to find this expression
+     * @return expression found, or null if nothing matched.
+     */
+    private fun findExpression(expr: SqlExpression?, toString: String): SqlExpression? {
+        if (expr == null) return null
         if (expr.toString() == toString) {
             return expr
         }
+        if (expr is SelectExpression) {
+            expr.columns.forEach { expr ->
+                findExpression(expr, toString).takeIf { it != null }?.let { return it }
+            }
+            findExpression(expr.from, toString).takeIf { it != null }?.let { return it }
+            findExpression(expr.where, toString).takeIf { it != null }?.let { return it }
+        }
+        if (expr is ColumnDeclaringExpression<*>) {
+            findExpression(expr.expression, toString).takeIf { it != null }?.let { return it }
+        }
         if (expr is UnaryExpression<*>) {
-            findExpression(expr.operand, toString).takeIf { it != null }
-                ?.let { return it }
+            findExpression(expr.operand, toString).takeIf { it != null }?.let { return it }
         }
         if (expr is BinaryExpression<*>) {
-            findExpression(expr.left, toString).takeIf { it != null }
-                ?.let { return it }
-            findExpression(expr.right, toString).takeIf { it != null }
-                ?.let { return it }
+            findExpression(expr.left, toString).takeIf { it != null }?.let { return it }
+            findExpression(expr.right, toString).takeIf { it != null }?.let { return it }
+        }
+        if (expr is UnionExpression) {
+            findExpression(expr.left, toString).takeIf { it != null }?.let { return it }
+            findExpression(expr.right, toString).takeIf { it != null }?.let { return it }
         }
         return null
     }
@@ -78,14 +99,9 @@ class QueryDataProvider<T>(
         table.columns.map { it.asExpression() } .firstOrNull { it.toString() == toString }
 
     private val Query<T, ColumnDeclaring<Boolean>>.orderBy: List<OrderByExpression> get() {
-        val selectExpr = querySource(ActiveKtorm.database).expression
+        val selectExpr = query(querySource(ActiveKtorm.database)).expression
         return sortOrders.map { sortOrder ->
-            var expr: SqlExpression? = tables.firstNotNullOfOrNull {
-                findExpression(it, sortOrder.sorted)
-            }
-            if (expr == null) {
-                expr = findExpression(selectExpr, sortOrder.sorted)
-            }
+            val expr = findExpression(selectExpr, sortOrder.sorted)
             checkNotNull(expr) {
                 "Expression ${sortOrder.sorted} not found in $selectExpr"
             }
