@@ -40,4 +40,11 @@ class BinderTests {
        expect("Rimmer") { p.name }
        expect(35) { p.age }
     }
+
+    @Test
+    fun validationWorks() {
+        // test for https://hibernate.atlassian.net/browse/HV-2018
+        val form = Form()
+        expect(false) { form.binder.writeBeanIfValid(Person{}) }
+    }
 }
