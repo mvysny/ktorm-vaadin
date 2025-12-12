@@ -30,8 +30,7 @@ import kotlin.collections.map
  * entities use [EntityDataProvider]. Example of use:
  * ```
  * val dp = QueryDataProvider(
- *   { it.from(Reviews).leftJoin(Categories, on = Reviews.category eq Categories.id)
- *   { it.select(*Reviews.columns.toTypedArray(), Categories.name)},
+ *   { it.from(Reviews).leftJoin(Categories, on = Reviews.category eq Categories.id).select(*Reviews.columns.toTypedArray(), Categories.name)},
  *   { ReviewWithCategory.from(it) })
  * val filter = Reviews.name.ilike(normalizedFilter) or
  *   Categories.name.ilike(normalizedFilter)
@@ -42,8 +41,7 @@ import kotlin.collections.map
  * @param T the bean type returned by this data provider.
  */
 class QueryDataProvider<T>(
-    val querySource: (Database) -> QuerySource,
-    val query: (QuerySource) -> org.ktorm.dsl.Query,
+    val query: (Database) -> org.ktorm.dsl.Query,
     val rowMapper: (QueryRowSet) -> T
 ) : AbstractBackEndDataProvider<T, ColumnDeclaring<Boolean>>(),
     ConfigurableFilterDataProvider<T, ColumnDeclaring<Boolean>, ColumnDeclaring<Boolean>> {
@@ -96,19 +94,19 @@ class QueryDataProvider<T>(
     }
 
     private val Query<T, ColumnDeclaring<Boolean>>.orderBy: List<OrderByExpression> get() {
-        val selectExpr = query(querySource(ActiveKtorm.database)).expression
+        val selectExpr = query(ActiveKtorm.database).expression
         return sortOrders.map { sortOrder ->
             val expr = findExpression(selectExpr, sortOrder.sorted)
             checkNotNull(expr) {
                 "Expression ${sortOrder.sorted} not found in $selectExpr"
             }
-            val ot = if (sortOrder.direction == SortDirection.ASCENDING) OrderType.ASCENDING else OrderType.DESCENDING
-            OrderByExpression(expr as ScalarExpression<*>, ot)
+            val orderType = if (sortOrder.direction == SortDirection.ASCENDING) OrderType.ASCENDING else OrderType.DESCENDING
+            OrderByExpression(expr as ScalarExpression<*>, orderType)
         }
     }
 
     override fun fetchFromBackEnd(query: Query<T, ColumnDeclaring<Boolean>>): Stream<T> = db {
-        var q: org.ktorm.dsl.Query = query(querySource(database))
+        var q: org.ktorm.dsl.Query = query(database)
         val filter = calculateFilter(query)
         if (filter != null) {
             q = q.where(filter)
@@ -120,7 +118,7 @@ class QueryDataProvider<T>(
 
     override fun sizeInBackEnd(query: Query<T, ColumnDeclaring<Boolean>>): Int = db {
 //        var q: org.ktorm.dsl.Query = querySource(database).select(count())
-        var q: org.ktorm.dsl.Query = query(querySource(database)).countQuery()
+        var q: org.ktorm.dsl.Query = query(database).countQuery()
         val filter = calculateFilter(query)
         if (filter != null) {
             q = q.where(filter)
