@@ -6,14 +6,11 @@ import com.github.mvysny.karibudsl.v23.footer
 import com.github.mvysny.karibudsl.v23.openConfirmDialog
 import com.github.mvysny.karibudsl.v23.setCloseOnCancel
 import com.github.mvysny.karibudsl.v23.setConfirmIsDanger
-import com.github.mvysny.kaributools.setDanger
 import com.github.mvysny.kaributools.setPrimary
 import com.github.mvysny.ktormvaadin.ActiveEntity
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.dialog.Dialog
-import com.vaadin.flow.component.notification.Notification
-import com.vaadin.flow.component.notification.NotificationVariant
 import com.vaadin.flow.data.binder.Binder
 
 /**
