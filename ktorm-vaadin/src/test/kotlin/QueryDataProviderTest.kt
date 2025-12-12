@@ -7,6 +7,9 @@ import com.github.mvysny.kaributools.fetchAll
 import com.github.mvysny.kaributools.sort
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.data.provider.Query
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
+import org.jetbrains.annotations.NotNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -124,6 +127,10 @@ object Addresses : Table<Address>("addresses") {
 
 interface Address : ActiveEntity<Address> {
     val id: Int?
+
+    @get:NotNull
+    @get:NotBlank
+    @get:Size(min = 1, max = 255)
     var street: String?
     var city: String?
     var of_person_id: Int?

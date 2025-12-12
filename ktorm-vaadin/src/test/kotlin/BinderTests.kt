@@ -1,5 +1,6 @@
 package com.github.mvysny.ktormvaadin
 
+import com.vaadin.flow.component.combobox.ComboBox
 import com.vaadin.flow.component.textfield.IntegerField
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.binder.BeanValidationBinder
@@ -48,5 +49,18 @@ class BinderTests {
         // test for https://hibernate.atlassian.net/browse/HV-2018
         val form = PersonForm()
         expect(false) { form.binder.writeBeanIfValid(Person{}) }
+    }
+}
+
+class AddressForm {
+    val streetField = TextField()
+    val cityField = TextField()
+    val personPicker = ComboBox<Person>()
+    val binder = BeanValidationBinder(Address::class.java)
+    init {
+        binder.forField(streetField).bind(Addresses.street)
+        binder.forField(cityField).bind(Addresses.city)
+//        binder.forField(personPicker).id
+        // TODO implement
     }
 }
