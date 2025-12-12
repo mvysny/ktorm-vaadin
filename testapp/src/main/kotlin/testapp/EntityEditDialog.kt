@@ -4,11 +4,13 @@ import com.github.mvysny.karibudsl.v10.button
 import com.github.mvysny.karibudsl.v10.onClick
 import com.github.mvysny.karibudsl.v23.footer
 import com.github.mvysny.karibudsl.v23.openConfirmDialog
+import com.github.mvysny.karibudsl.v23.setCloseOnCancel
 import com.github.mvysny.karibudsl.v23.setConfirmIsDanger
 import com.github.mvysny.kaributools.setDanger
 import com.github.mvysny.kaributools.setPrimary
 import com.github.mvysny.ktormvaadin.ActiveEntity
 import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.dialog.Dialog
 import com.vaadin.flow.component.notification.Notification
 import com.vaadin.flow.component.notification.NotificationVariant
@@ -56,6 +58,7 @@ class EntityEditDialog<E : ActiveEntity<E>>(val entity: E, val entityName: Strin
     init {
         headerTitle = "${if (isCreating) "Create" else "Edit"} $entityName"
         add(form as Component)
+        form.binder.readBean(entity)
         footer {
             button("Save") {
                 setPrimary()
@@ -66,7 +69,7 @@ class EntityEditDialog<E : ActiveEntity<E>>(val entity: E, val entityName: Strin
             }
             if (!isCreating) {
                 button("Delete") {
-                    setDanger()
+                    addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_PRIMARY)
                     onClick { delete() }
                 }
             }
@@ -93,7 +96,7 @@ class EntityEditDialog<E : ActiveEntity<E>>(val entity: E, val entityName: Strin
                 frame.close()
                 onChange()
             }
-            setCancelText("Cancel")
+            setCloseOnCancel("Cancel")
         }
     }
 }
