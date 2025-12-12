@@ -6,13 +6,18 @@ import com.github.mvysny.kaributools.desc
 import com.github.mvysny.kaributools.sort
 import com.github.mvysny.ktormvaadin.QueryDataProvider
 import com.github.mvysny.ktormvaadin.and
+import com.github.mvysny.ktormvaadin.bind
+import com.github.mvysny.ktormvaadin.dataProvider
 import com.github.mvysny.ktormvaadin.filter.DateRangePopup
 import com.github.mvysny.ktormvaadin.filter.FilterTextField
 import com.github.mvysny.ktormvaadin.filter.NumberRangePopup
 import com.github.mvysny.ktormvaadin.filter.between
 import com.github.mvysny.ktormvaadin.q
+import com.github.mvysny.ktormvaadin.withStringFilterOn
+import com.vaadin.flow.component.ItemLabelGenerator
 import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.grid.Grid
+import com.vaadin.flow.data.converter.IntegerToLongConverter
 import com.vaadin.flow.router.Route
 import org.ktorm.dsl.QueryRowSet
 import org.ktorm.dsl.eq
@@ -135,6 +140,33 @@ data class EmployeeDept(val employee: Employee, val department: Department) {
 class EmployeeForm : FormLayout(), HasBinder<Employee> {
    override val binder = beanValidationBinder<Employee>()
     init {
-        throw RuntimeException("Unimplemented")
+        textField("Name") {
+            setId("name")
+            bind(binder).bind(Employees.name)
+        }
+        textField("Job") {
+            setId("job")
+            bind(binder).bind(Employees.job)
+        }
+        comboBox<Employee>("Manager") {
+            setId("manager")
+            setItems(Employees.dataProvider.withStringFilterOn(Employees.name))
+            itemLabelGenerator = ItemLabelGenerator { it.name }
+            bind(binder).bind(Employee::manager)
+        }
+        datePicker("Hire Date") {
+            setId("hireDate")
+            bind(binder).bind(Employees.hireDate)
+        }
+        integerField("Salary") {
+            setId("salary")
+            bind(binder).withConverter(IntegerToLongConverter()).bind(Employees.salary)
+        }
+        comboBox<Department>("Department") {
+            setId("department")
+            setItems(Departments.dataProvider.withStringFilterOn(Departments.name))
+            itemLabelGenerator = ItemLabelGenerator { it.name }
+            bind(binder).bind(Employee::department)
+        }
     }
 }

@@ -2,15 +2,19 @@ package testapp
 
 import com.github.mvysny.kaributesting.v10.*
 import com.github.mvysny.kaributools.navigateTo
+import com.github.mvysny.ktormvaadin.findAll
+import com.vaadin.flow.component.combobox.ComboBox
+import com.vaadin.flow.component.datepicker.DatePicker
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.GridSortOrder
+import com.vaadin.flow.component.textfield.IntegerField
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.provider.SortDirection
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import kotlin.test.expect
 
 class EmployeesRouteTest : AbstractAppTest() {
     @BeforeEach fun navigate() {
@@ -56,6 +60,34 @@ class EmployeesRouteTest : AbstractAppTest() {
             grid.sort(listOf(GridSortOrder(it, SortDirection.DESCENDING)))
             grid.expectRows(112)
             grid._findAll()
+        }
+    }
+    @Nested
+    inner class EmployeeFormTest {
+        val form = EmployeeForm()
+        val employee = Employees.findAll()[0]
+        @Test
+        fun readValues() {
+            form.binder.readBean(employee)
+            expect("Manager 0") { form._get<TextField> { id = "name" }._value }
+            expect("Manager") { form._get<TextField> { id = "job" }._value }
+        }
+        @Test
+        fun writeValues() {
+            form._get<TextField> { id = "name" }._value = "Foo"
+            form._get<TextField> { id = "job" }._value = "Bar"
+            form._get<ComboBox<Employee>>{ id = "manager" }._value = employee
+            form._get<DatePicker>{id = "hireDate"}._value = LocalDate.now()
+            form._get<IntegerField>{id = "salary"}._value = 25
+            val department = Departments.findAll()[0]
+            form._get<ComboBox<Department>>{id = "department"}._value = department
+            val bean = Employee{}
+            form.binder.writeBean(bean)
+            expect(Employee{ name = "Foo"; job = "Bar"; this.department = department; manager = employee; hireDate = LocalDate.now(); salary = 25 }) { bean }
+        }
+        @Test
+        fun emptyFormWontValidate() {
+            expect(false) { form.binder.writeBeanIfValid(Employee{})}
         }
     }
 }

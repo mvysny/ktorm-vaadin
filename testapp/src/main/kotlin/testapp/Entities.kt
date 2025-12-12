@@ -44,11 +44,20 @@ interface Department : ActiveEntity<Department> {
 
 interface Employee : ActiveEntity<Employee> {
     val id: Int
+    @get:NotNull
+    @get:NotBlank
+    @get:Size(min = 1, max = 255)
     var name: String
+    @get:NotNull
+    @get:NotBlank
+    @get:Size(min = 1, max = 255)
     var job: String
     var manager: Employee?
-    var hireDate: LocalDate
+    @get:NotNull
+    var hireDate: LocalDate?
+    @get:NotNull
     var salary: Long
+    @get:NotNull
     var department: Department
     override val table: Table<Employee> get() = Employees
     companion object : Entity.Factory<Employee>()
