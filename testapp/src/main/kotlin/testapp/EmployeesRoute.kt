@@ -125,6 +125,9 @@ class EmployeesRoute : KComposite() {
     }
 }
 
+/**
+ * A bean which captures a join of [Employee] and [Department].
+ */
 data class EmployeeDept(val employee: Employee, val department: Department) {
     companion object {
         fun from(row: QueryRowSet): EmployeeDept = EmployeeDept(
@@ -138,6 +141,10 @@ data class EmployeeDept(val employee: Employee, val department: Department) {
     }
 }
 
+/**
+ * A form which edits an [Employee]. Uses [binder] to do that.
+ * Read Vaadin documentation on Binder to understand the concept.
+ */
 class EmployeeForm : FormLayout(), HasBinder<Employee> {
    override val binder = beanValidationBinder<Employee>()
     init {
