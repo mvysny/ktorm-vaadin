@@ -3,6 +3,7 @@ package com.github.mvysny.ktormvaadin
 import com.vaadin.flow.component.textfield.IntegerField
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.binder.BeanValidationBinder
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import kotlin.test.expect
 
@@ -20,25 +21,26 @@ class BinderTests {
             binder.forField(ageField).bind(Persons.age)
         }
     }
+    @Nested inner class bindTests {
+        @Test
+        fun valuePropagatedFromBeanToForm() {
+            val form = PersonForm()
+            val person = Person { name = "Rimmer"; age = 35 }
+            form.binder.readBean(person)
+            expect("Rimmer") { form.nameField.value }
+            expect(35) { form.ageField.value }
+        }
 
-    @Test
-    fun valuePropagatedFromBeanToForm() {
-        val form = PersonForm()
-        val person = Person { name = "Rimmer"; age = 35 }
-        form.binder.readBean(person)
-        expect("Rimmer") { form.nameField.value}
-        expect(35) { form.ageField.value}
-    }
-
-    @Test
-    fun valuesPropagatedFromFormToBean() {
-       val form = PersonForm()
-       form.nameField.value = "Rimmer"
-       form.ageField.value = 35
-       val p = Person{}
-       form.binder.writeBean(p)
-       expect("Rimmer") { p.name }
-       expect(35) { p.age }
+        @Test
+        fun valuesPropagatedFromFormToBean() {
+            val form = PersonForm()
+            form.nameField.value = "Rimmer"
+            form.ageField.value = 35
+            val p = Person {}
+            form.binder.writeBean(p)
+            expect("Rimmer") { p.name }
+            expect(35) { p.age }
+        }
     }
 
     @Test
