@@ -3,6 +3,9 @@ package testapp
 import com.github.mvysny.ktormvaadin.ActiveEntity
 import com.github.mvysny.ktormvaadin.db
 import com.github.mvysny.ktormvaadin.deleteAll
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Size
 import org.ktorm.dsl.update
 import org.ktorm.entity.Entity
 import org.ktorm.schema.*
@@ -27,7 +30,13 @@ object Employees : Table<Employee>("t_employee") {
 
 interface Department : ActiveEntity<Department> {
     val id: Int
+    @get:NotNull
+    @get:NotBlank
+    @get:Size(min = 1, max = 255)
     var name: String
+    @get:NotNull
+    @get:NotBlank
+    @get:Size(min = 1, max = 255)
     var location: String
     override val table: Table<Department> get() = Departments
     companion object : Entity.Factory<Department>()

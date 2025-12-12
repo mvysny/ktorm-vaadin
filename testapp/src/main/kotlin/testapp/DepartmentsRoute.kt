@@ -4,12 +4,16 @@ import com.github.mvysny.karibudsl.v10.*
 import com.github.mvysny.kaributools.asc
 import com.github.mvysny.kaributools.sort
 import com.github.mvysny.ktormvaadin.and
+import com.github.mvysny.ktormvaadin.bind
 import com.github.mvysny.ktormvaadin.dataProvider
 import com.github.mvysny.ktormvaadin.e
 import com.github.mvysny.ktormvaadin.filter.FilterTextField
 import com.github.mvysny.ktormvaadin.filter.NumberRangePopup
 import com.github.mvysny.ktormvaadin.filter.between
+import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.grid.Grid
+import com.vaadin.flow.component.masterdetaillayout.MasterDetailLayout
+import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.router.Route
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.support.postgresql.ilike
@@ -69,5 +73,22 @@ class DepartmentsRoute : KComposite() {
             conditions += Departments.location.ilike(locationFilter.value.trim() + "%")
         }
         dataProvider.setFilter(conditions.and())
+    }
+}
+
+/**
+ * Edits the [Department] bean.
+ */
+class DepartmentForm : FormLayout() {
+    val binder = beanValidationBinder<Department>()
+    init {
+        textField("Name") {
+            setId("name")
+            bind(binder).bind(Departments.name)
+        }
+        textField("Location") {
+            setId("location")
+            bind(binder).bind(Departments.location)
+        }
     }
 }
