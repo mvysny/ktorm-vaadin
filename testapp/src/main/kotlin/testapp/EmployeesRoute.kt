@@ -13,6 +13,7 @@ import com.github.mvysny.ktormvaadin.filter.FilterTextField
 import com.github.mvysny.ktormvaadin.filter.NumberRangePopup
 import com.github.mvysny.ktormvaadin.filter.between
 import com.github.mvysny.ktormvaadin.q
+import com.github.mvysny.ktormvaadin.toId
 import com.github.mvysny.ktormvaadin.withStringFilterOn
 import com.vaadin.flow.component.ItemLabelGenerator
 import com.vaadin.flow.component.formlayout.FormLayout
@@ -152,7 +153,7 @@ class EmployeeForm : FormLayout(), HasBinder<Employee> {
             setId("manager")
             setItems(Employees.dataProvider.withStringFilterOn(Employees.name))
             itemLabelGenerator = ItemLabelGenerator { it.name }
-            bind(binder).bind(Employee::manager)
+            bind(binder).toId(Employees.id).bind(Employees.managerId)
         }
         datePicker("Hire Date") {
             setId("hireDate")
@@ -166,7 +167,7 @@ class EmployeeForm : FormLayout(), HasBinder<Employee> {
             setId("department")
             setItems(Departments.dataProvider.withStringFilterOn(Departments.name))
             itemLabelGenerator = ItemLabelGenerator { it.name }
-            bind(binder).bind(Employee::department)
+            bind(binder).toId(Departments.id).bind(Employees.departmentId)
         }
     }
 }
