@@ -10,7 +10,7 @@ class BinderTests {
     /**
      * Uses [bind] to bind fields to entity properties.
      */
-    class Form {
+    class PersonForm {
         val nameField = TextField()
         val ageField = IntegerField()
         val binder = BeanValidationBinder(Person::class.java)
@@ -23,7 +23,7 @@ class BinderTests {
 
     @Test
     fun valuePropagatedFromBeanToForm() {
-        val form = Form()
+        val form = PersonForm()
         val person = Person { name = "Rimmer"; age = 35 }
         form.binder.readBean(person)
         expect("Rimmer") { form.nameField.value}
@@ -32,7 +32,7 @@ class BinderTests {
 
     @Test
     fun valuesPropagatedFromFormToBean() {
-       val form = Form()
+       val form = PersonForm()
        form.nameField.value = "Rimmer"
        form.ageField.value = 35
        val p = Person{}
@@ -44,7 +44,7 @@ class BinderTests {
     @Test
     fun validationWorks() {
         // test for https://hibernate.atlassian.net/browse/HV-2018
-        val form = Form()
+        val form = PersonForm()
         expect(false) { form.binder.writeBeanIfValid(Person{}) }
     }
 }
