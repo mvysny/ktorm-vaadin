@@ -18,7 +18,6 @@ import org.ktorm.expression.SelectExpression
 import org.ktorm.expression.SqlExpression
 import org.ktorm.expression.UnaryExpression
 import org.ktorm.expression.UnionExpression
-import org.ktorm.schema.BaseTable
 import org.ktorm.schema.Column
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.schema.Table
@@ -95,8 +94,6 @@ class QueryDataProvider<T>(
         }
         return null
     }
-    private fun findExpression(table: BaseTable<*>, toString: String): SqlExpression? =
-        table.columns.map { it.asExpression() } .firstOrNull { it.toString() == toString }
 
     private val Query<T, ColumnDeclaring<Boolean>>.orderBy: List<OrderByExpression> get() {
         val selectExpr = query(querySource(ActiveKtorm.database)).expression
@@ -122,7 +119,8 @@ class QueryDataProvider<T>(
     }
 
     override fun sizeInBackEnd(query: Query<T, ColumnDeclaring<Boolean>>): Int = db {
-        var q: org.ktorm.dsl.Query = querySource(database).select(count())
+//        var q: org.ktorm.dsl.Query = querySource(database).select(count())
+        var q: org.ktorm.dsl.Query = query(querySource(database)).countQuery()
         val filter = calculateFilter(query)
         if (filter != null) {
             q = q.where(filter)
@@ -191,4 +189,20 @@ data class QueryDataProviderColumnKey(val column: Column<*>) {
     val key: String get() = column.asExpression().toString()
     val asc: QuerySortOrder get() = QuerySortOrder(key, SortDirection.ASCENDING)
     val desc: QuerySortOrder get() = QuerySortOrder(key, SortDirection.DESCENDING)
+}
+
+internal fun <T : Any> ColumnDeclaring<T>.asDeclaringExpression(): ColumnDeclaringExpression<T> {
+    return when (this) {
+        is ColumnDeclaringExpression -> this
+        is Column -> this.aliased(label)
+        else -> this.aliased(null)
+    }
+}
+
+fun org.ktorm.dsl.Query.countQuery(): org.ktorm.dsl.Query {
+    val columns = listOf(count())
+    val declarations = columns.map { it.asDeclaringExpression() }
+    var expr = expression as SelectExpression
+    expr = expr.copy(columns = declarations)
+    return Query(database, expr)
 }
