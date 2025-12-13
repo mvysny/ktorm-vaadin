@@ -1,6 +1,9 @@
 package testapp
 
 import com.github.mvysny.karibudsl.v10.*
+import com.github.mvysny.karibudsl.v23.detail
+import com.github.mvysny.karibudsl.v23.master
+import com.github.mvysny.karibudsl.v23.masterDetailLayout
 import com.github.mvysny.karibudsl.v23.openConfirmDialog
 import com.github.mvysny.karibudsl.v23.setCloseOnCancel
 import com.github.mvysny.karibudsl.v23.setConfirmIsDanger
@@ -14,8 +17,6 @@ import com.github.mvysny.ktormvaadin.e
 import com.github.mvysny.ktormvaadin.filter.FilterTextField
 import com.github.mvysny.ktormvaadin.filter.NumberRangePopup
 import com.github.mvysny.ktormvaadin.filter.between
-import com.vaadin.flow.component.Component
-import com.vaadin.flow.component.HasComponents
 import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.masterdetaillayout.MasterDetailLayout
@@ -160,54 +161,4 @@ class DepartmentForm : FormLayout(), HasBinder<Department> {
             bind(binder).bind(Departments.location)
         }
     }
-}
-
-/**
- * Creates a [MasterDetailLayout](https://vaadin.com/docs/latest/components/master-detail-layout). Example of usage:
- * ```kotlin
- * val masterDetail = masterDetailLayout {
- *   detailSize = "400px"
- *   master {
- *     grid<Department>(Departments.dataProvider) {
- *       // ...
- *       asSingleSelect().addValueChangeListener { showDepartment(it.value) }
- *     }
- *   }
- * }
- * fun showDepartment(dept: Department?) {
- *   if (dept == null) {
- *     masterDetail.detail = null
- *   } else {
- *     masterDetail.detail {
- *       verticalLayout {
- *         departmentForm(dept)
- *         button("Edit"} {
- *           // ...
- *         }
- *       }
- *     }
- *   }
- * }
- * ```
- */
-@VaadinDsl
-fun (@VaadinDsl HasComponents).masterDetailLayout(block: (@VaadinDsl MasterDetailLayout).() -> Unit = {}): MasterDetailLayout
-        = init(MasterDetailLayout(), block)
-
-/**
- * Populates [MasterDetailLayout.setMaster], DSL-style. See [masterDetailLayout] for an example.
- */
-@VaadinDsl
-fun <C : Component> (@VaadinDsl MasterDetailLayout).master(block: (@VaadinDsl HasComponents).() -> C): C {
-    master = buildSingleComponent("MasterDetailLayout.master{}", block)
-    return master as C
-}
-
-/**
- * Populates [MasterDetailLayout.setDetail], DSL-style. See [masterDetailLayout] for an example.
- */
-@VaadinDsl
-fun <C : Component> (@VaadinDsl MasterDetailLayout).detail(block: (@VaadinDsl HasComponents).() -> C): C {
-    detail = buildSingleComponent("MasterDetailLayout.detail{}", block)
-    return detail as C
 }
