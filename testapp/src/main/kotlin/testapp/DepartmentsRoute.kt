@@ -1,7 +1,11 @@
 package testapp
 
 import com.github.mvysny.karibudsl.v10.*
+import com.github.mvysny.karibudsl.v23.openConfirmDialog
+import com.github.mvysny.karibudsl.v23.setCloseOnCancel
+import com.github.mvysny.karibudsl.v23.setConfirmIsDanger
 import com.github.mvysny.kaributools.asc
+import com.github.mvysny.kaributools.setDanger
 import com.github.mvysny.kaributools.sort
 import com.github.mvysny.ktormvaadin.and
 import com.github.mvysny.ktormvaadin.bind
@@ -87,10 +91,13 @@ class DepartmentsRoute : KComposite() {
 
     private fun edit(bean: Department) {
         EntityEditDialog(bean, "department ${bean.name}", DepartmentForm()) {
-            dataProvider.refreshAll()
+            refresh()
         } .open()
     }
 
+    /**
+     * Shows [dept] in the detail view, in a read-only form.
+     */
     private fun showDetail(dept: Department?) {
         if (dept == null) {
             masterDetail.detail = null
@@ -102,13 +109,39 @@ class DepartmentsRoute : KComposite() {
             masterDetail.detail {
                 verticalLayout {
                     add(previewForm)
-                    button("Edit") {
-                        onClick { edit(previewForm!!.binder.bean) }
+                    horizontalLayout {
+                        button("Edit") {
+                            onClick { edit(previewForm!!.binder.bean) }
+                        }
+                        button("Delete") {
+                            setDanger()
+                            onClick { delete(previewForm!!.binder.bean) }
+                        }
                     }
                 }
             }
         }
         previewForm!!.binder.bean = dept
+    }
+
+    private fun refresh() {
+        dataProvider.refreshAll()
+        hideDetail()
+    }
+
+    private fun hideDetail() {
+        showDetail(null)
+    }
+
+    private fun delete(entity: Department) {
+        openConfirmDialog("Delete", "Are you sure you want to delete department ${entity.name}?") {
+            setConfirmIsDanger()
+            setConfirmButton("Delete") {
+                entity.delete()
+                refresh()
+            }
+            setCloseOnCancel("Cancel")
+        }
     }
 }
 
