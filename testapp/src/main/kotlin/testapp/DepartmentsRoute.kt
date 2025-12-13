@@ -105,7 +105,7 @@ class DepartmentsRoute : KComposite() {
             return
         }
         if (previewForm == null) {
-            previewForm = DepartmentForm().apply { binder.setReadOnly(true) }
+            previewForm = DepartmentForm().apply { readOnly() }
             masterDetail.detail {
                 verticalLayout {
                     add(previewForm)
