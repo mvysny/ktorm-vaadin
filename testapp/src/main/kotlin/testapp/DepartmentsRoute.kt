@@ -10,8 +10,11 @@ import com.github.mvysny.ktormvaadin.e
 import com.github.mvysny.ktormvaadin.filter.FilterTextField
 import com.github.mvysny.ktormvaadin.filter.NumberRangePopup
 import com.github.mvysny.ktormvaadin.filter.between
+import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.HasComponents
 import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.grid.Grid
+import com.vaadin.flow.component.masterdetaillayout.MasterDetailLayout
 import com.vaadin.flow.router.Route
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.support.postgresql.ilike
@@ -25,33 +28,41 @@ class DepartmentsRoute : KComposite() {
     private val nameFilter = FilterTextField("name_filter")
     private val locationFilter = FilterTextField("location_filter")
     private val dataProvider = Departments.dataProvider
+    private lateinit var masterDetail: MasterDetailLayout
+    private var previewForm: DepartmentForm? = null
 
     val root = ui {
         verticalLayout {
             setSizeFull()
             h2("Departments")
-            grid<Department>(dataProvider) {
+            masterDetail = masterDetailLayout {
                 setWidthFull(); isExpand = true
-                setMultiSort(true, Grid.MultiSortPriority.APPEND, true)
-                appendHeaderRow()
-                val filterBar = prependHeaderRow()
-                columnFor(Department::id, key = Departments.id.e.key) {
-                    setHeader("ID")
-                    isSortable = true
-                    filterBar.getCell(this).component = idFilter
+                detailSize = "400px"
+                master {
+                    grid<Department>(dataProvider) {
+                        setSizeFull()
+                        setMultiSort(true, Grid.MultiSortPriority.APPEND, true)
+                        appendHeaderRow()
+                        val filterBar = prependHeaderRow()
+                        columnFor(Department::id, key = Departments.id.e.key) {
+                            setHeader("ID")
+                            isSortable = true
+                            filterBar.getCell(this).component = idFilter
+                        }
+                        val nameCol = columnFor(Department::name, key = Departments.name.e.key) {
+                            setHeader("Name")
+                            isSortable = true
+                            filterBar.getCell(this).component = nameFilter
+                        }
+                        columnFor(Department::location, key = Departments.location.e.key) {
+                            setHeader("Location")
+                            isSortable = true
+                            filterBar.getCell(this).component = locationFilter
+                        }
+                        sort(nameCol.asc)
+                        asSingleSelect().addValueChangeListener { showDetail(it.value) }
+                    }
                 }
-                val nameCol = columnFor(Department::name, key = Departments.name.e.key) {
-                    setHeader("Name")
-                    isSortable = true
-                    filterBar.getCell(this).component = nameFilter
-                }
-                columnFor(Department::location, key = Departments.location.e.key) {
-                    setHeader("Location")
-                    isSortable = true
-                    filterBar.getCell(this).component = locationFilter
-                }
-                sort(nameCol.asc)
-                addItemClickListener { if (it.item != null) edit(it.item) }
             }
         }
     }
@@ -79,6 +90,26 @@ class DepartmentsRoute : KComposite() {
             dataProvider.refreshAll()
         } .open()
     }
+
+    private fun showDetail(dept: Department?) {
+        if (dept == null) {
+            masterDetail.detail = null
+            previewForm = null
+            return
+        }
+        if (previewForm == null) {
+            previewForm = DepartmentForm().apply { binder.setReadOnly(true) }
+            masterDetail.detail {
+                verticalLayout {
+                    add(previewForm)
+                    button("Edit") {
+                        onClick { edit(previewForm!!.binder.bean) }
+                    }
+                }
+            }
+        }
+        previewForm!!.binder.bean = dept
+    }
 }
 
 /**
@@ -96,4 +127,19 @@ class DepartmentForm : FormLayout(), HasBinder<Department> {
             bind(binder).bind(Departments.location)
         }
     }
+}
+
+@VaadinDsl
+fun (@VaadinDsl HasComponents).masterDetailLayout(block: (@VaadinDsl MasterDetailLayout).() -> Unit = {}): MasterDetailLayout
+        = init(MasterDetailLayout(), block)
+
+@VaadinDsl
+fun <C : Component> (@VaadinDsl MasterDetailLayout).master(block: (@VaadinDsl HasComponents).() -> C): C {
+    master = buildSingleComponent("MasterDetailLayout.master{}", block)
+    return master as C
+}
+@VaadinDsl
+fun <C : Component> (@VaadinDsl MasterDetailLayout).detail(block: (@VaadinDsl HasComponents).() -> C): C {
+    detail = buildSingleComponent("MasterDetailLayout.detail{}", block)
+    return detail as C
 }
