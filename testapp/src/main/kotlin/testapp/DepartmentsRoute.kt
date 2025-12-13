@@ -162,15 +162,50 @@ class DepartmentForm : FormLayout(), HasBinder<Department> {
     }
 }
 
+/**
+ * Creates a [MasterDetailLayout](https://vaadin.com/docs/latest/components/master-detail-layout). Example of usage:
+ * ```kotlin
+ * val masterDetail = masterDetailLayout {
+ *   detailSize = "400px"
+ *   master {
+ *     grid<Department>(Departments.dataProvider) {
+ *       // ...
+ *       asSingleSelect().addValueChangeListener { showDepartment(it.value) }
+ *     }
+ *   }
+ * }
+ * fun showDepartment(dept: Department?) {
+ *   if (dept == null) {
+ *     masterDetail.detail = null
+ *   } else {
+ *     masterDetail.detail {
+ *       verticalLayout {
+ *         departmentForm(dept)
+ *         button("Edit"} {
+ *           // ...
+ *         }
+ *       }
+ *     }
+ *   }
+ * }
+ * ```
+ */
 @VaadinDsl
 fun (@VaadinDsl HasComponents).masterDetailLayout(block: (@VaadinDsl MasterDetailLayout).() -> Unit = {}): MasterDetailLayout
         = init(MasterDetailLayout(), block)
 
+/**
+ * Populates [MasterDetailLayout.setMaster], DSL-style. See [masterDetailLayout] for an example.
+ */
 @VaadinDsl
 fun <C : Component> (@VaadinDsl MasterDetailLayout).master(block: (@VaadinDsl HasComponents).() -> C): C {
     master = buildSingleComponent("MasterDetailLayout.master{}", block)
     return master as C
 }
+
+/**
+ * Populates [MasterDetailLayout.setDetail], DSL-style. See [masterDetailLayout] for an example.
+ */
 @VaadinDsl
 fun <C : Component> (@VaadinDsl MasterDetailLayout).detail(block: (@VaadinDsl HasComponents).() -> C): C {
     detail = buildSingleComponent("MasterDetailLayout.detail{}", block)
