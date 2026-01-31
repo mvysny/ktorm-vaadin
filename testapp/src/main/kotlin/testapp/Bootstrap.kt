@@ -1,6 +1,7 @@
 package testapp
 
 import com.github.mvysny.ktormvaadin.ActiveKtorm
+import com.vaadin.flow.component.dependency.StyleSheet
 import com.vaadin.flow.component.notification.Notification
 import com.vaadin.flow.component.notification.NotificationVariant
 import com.vaadin.flow.component.page.AppShellConfigurator
@@ -9,6 +10,7 @@ import com.vaadin.flow.server.ServiceInitEvent
 import com.vaadin.flow.server.SessionInitEvent
 import com.vaadin.flow.server.SessionInitListener
 import com.vaadin.flow.server.VaadinServiceInitListener
+import com.vaadin.flow.theme.lumo.Lumo
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import jakarta.servlet.ServletContextEvent
@@ -19,6 +21,7 @@ import org.ktorm.database.Database
 import org.slf4j.LoggerFactory
 
 // Required by Vaadin
+@StyleSheet(Lumo.STYLESHEET)
 class AppShell : AppShellConfigurator
 
 // All this bullshit, just to show error notification if the app throws.

@@ -51,7 +51,7 @@ class PopupButton(caption: String = "") : Composite<Component?>(), HasSize {
      */
     fun setPopupContent(content: Component) {
         menuItem.subMenu.removeAll()
-        menuItem.subMenu.add(content)
+        menuItem.subMenu.addComponent(content)
     }
 
     /**

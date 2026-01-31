@@ -1,5 +1,5 @@
 [versions]
-vaadin = "24.9.7"
+vaadin = "25.0.4"
 # https://repo1.maven.org/maven2/org/slf4j/slf4j-api/
 slf4j = "2.0.17"
 ktorm = "4.1.1"
@@ -11,12 +11,13 @@ ktorm-postgresql = { module = "org.ktorm:ktorm-support-postgresql", version.ref 
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 vaadin-core = { module = "com.vaadin:vaadin-core", version.ref = "vaadin" }
-vaadinboot = "com.github.mvysny.vaadin-boot:vaadin-boot:13.4"
+vaadin-dev = { module = "com.vaadin:vaadin-dev", version.ref = "vaadin" }
+vaadinboot = "com.github.mvysny.vaadin-boot:vaadin-boot:13.6"
 hibernate-validator = "org.hibernate.validator:hibernate-validator:9.1.0.Final"
 jakarta-el = "org.glassfish:jakarta.el:4.0.2"
 # https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-engine/
 junit-jupiter-engine = "org.junit.jupiter:junit-jupiter-engine:6.0.1"
-karibu-testing = "com.github.mvysny.kaributesting:karibu-testing-v24:2.4.3"
+karibu-testing = "com.github.mvysny.kaributesting:karibu-testing-v24:2.6.2"
 karibu-dsl = "com.github.mvysny.karibudsl:karibu-dsl-v23:2.5.0"
 hikaricp = "com.zaxxer:HikariCP:7.0.2"
 h2 = "com.h2database:h2:2.2.224"  # https://repo1.maven.org/maven2/com/h2database/h2/

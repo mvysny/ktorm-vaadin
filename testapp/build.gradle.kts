@@ -8,6 +8,9 @@ dependencies {
 
     // Vaadin
     implementation(libs.vaadin.core)
+    if (!vaadin.effective.productionMode.get()) {
+        implementation(libs.vaadin.dev)
+    }
     implementation(libs.karibu.dsl)
     implementation(libs.vaadinboot)
 
