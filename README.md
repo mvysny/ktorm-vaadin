@@ -1,4 +1,4 @@
-# ktorm-vaadin
+# Ktorm for Vaadin
 
 [Ktorm](https://www.ktorm.org/) bindings for [Vaadin](https://vaadin.com/). Provides support for binding Ktorm entities to
 forms via Vaadin binder, listing them in Grids and ComboBoxes via DataProvider,
