@@ -121,6 +121,7 @@ val idColumn = personGrid.addColumn { it.id }
         .setSortable(true)
         .setKey(Persons.id.e.key) // When using EntityDataProvider
     .setKey(Persons.id.q.key) // When using QueryDataProvider
+dataProvider.setSortOrders(listOf(Persons.name.e.asc, Persons.age.e.asc))
 ```
 
 ## Grid Filters
