@@ -16,7 +16,17 @@ object ActiveKtorm {
     var validator: Validator = Validation.buildDefaultValidatorFactory().validator
 
     /**
-     * The [db] function obtains the JDBC connection from here. Use HikariCP connection pooling.
+     * The [db] function obtains the JDBC connection from here. Use HikariCP connection pooling:
+     * ```
+     * val cfg = HikariConfig().apply {
+     *   driverClassName = "org.h2.Driver"
+     *   jdbcUrl = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
+     *   username = "sa"
+     *   password = ""
+     * }
+     * dataSource = HikariDataSource(cfg)
+     * ActiveKtorm.database = Database.connect(dataSource)
+     * ```
      */
     @Volatile
     lateinit var database: Database
