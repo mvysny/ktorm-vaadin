@@ -14,12 +14,13 @@ import com.vaadin.flow.component.combobox.MultiSelectComboBoxVariant
  * No enum constants are selected by default.
  * @param <E> the type of enum constants shown in this field.
  */
-class EnumFilterField<E : Enum<E>>(enumClass: Class<E>) : MultiSelectComboBox<E>() {
+class EnumFilterField<E : Enum<E>>(enumClass: Class<E>, id: String = "") : MultiSelectComboBox<E>() {
     /**
      * Creates the field.
      * @param enumClass the enum class, not null.
      */
     init {
+        setId(id)
         isClearButtonVisible = true
         addThemeVariants(MultiSelectComboBoxVariant.LUMO_SMALL)
         setItems(*enumClass.getEnumConstants())

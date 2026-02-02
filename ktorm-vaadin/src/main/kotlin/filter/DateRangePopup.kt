@@ -23,10 +23,10 @@ import java.util.*
  *
  * The current date range is also displayed as the caption of the button.
  *
- * [value] never returns null - by default an [universal set][ClosedInterval.isUniversalSet]
+ * [DateRangePopup.getValue] never returns null - by default an [universal set][ClosedInterval.isUniversalSet]
  * is returned.
  */
-class DateRangePopup : CustomField<DateInterval>(DateInterval.UNIVERSAL) {
+class DateRangePopup(id: String = "") : CustomField<DateInterval>(DateInterval.UNIVERSAL) {
     /**
      * The "From" field, shown in the popup. You can customize the field to e.g.
      * set a localized caption, or add themes/CSS classes.
@@ -47,6 +47,7 @@ class DateRangePopup : CustomField<DateInterval>(DateInterval.UNIVERSAL) {
      * Creates the popup.
      */
     init {
+        setId(id)
         fromField.setId("from")
         fromField.placeholder = "From"
         toField.setId("to")

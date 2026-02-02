@@ -21,7 +21,7 @@ import com.vaadin.flow.component.textfield.TextFieldVariant
  * [getValue] never returns null - by default an [universal set][ClosedInterval.isUniversalSet]
  * is returned. Use [NumberInterval.contains] to easily convert this filter to a SQL statement.
  */
-class NumberRangePopup : CustomField<NumberInterval<Double>>(NumberInterval<Double>(null, null)) {
+class NumberRangePopup(id: String = "") : CustomField<NumberInterval<Double>>(NumberInterval<Double>(null, null)) {
     /**
      * The "From" field, shown in the popup. You can customize the field to e.g.
      * set a localized caption, or add themes/CSS classes.
@@ -42,6 +42,7 @@ class NumberRangePopup : CustomField<NumberInterval<Double>>(NumberInterval<Doub
      * Creates the popup.
      */
     init {
+        setId(id)
         fromField.setId("from")
         toField.setId("to")
         fromField.addThemeVariants(TextFieldVariant.LUMO_SMALL)

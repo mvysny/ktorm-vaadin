@@ -10,7 +10,7 @@ import com.vaadin.flow.data.value.ValueChangeMode
  * shows the clear button and fires value change events faster than the default text field
  * (which fires on blur).
  */
-class FilterTextField(id: String) : TextField() {
+class FilterTextField(id: String = "") : TextField() {
     init {
         setId(id)
         addThemeVariants(TextFieldVariant.LUMO_SMALL)
