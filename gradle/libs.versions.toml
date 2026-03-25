@@ -21,7 +21,7 @@ karibu-testing = "com.github.mvysny.kaributesting:karibu-testing-v24:2.7.0"
 karibu-dsl = "com.github.mvysny.karibudsl:karibu-dsl-v23:2.5.0"
 hikaricp = "com.zaxxer:HikariCP:7.0.2"
 h2 = "com.h2database:h2:2.4.240"
-flyway = "org.flywaydb:flyway-core:11.20.3"
+flyway = "org.flywaydb:flyway-core:12.1.1"
 
 [plugins]
 vaadin = { id = "com.vaadin", version.ref = "vaadin" }
