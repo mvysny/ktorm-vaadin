@@ -16,7 +16,7 @@ vaadinboot = "com.github.mvysny.vaadin-boot:vaadin-boot:13.7"
 hibernate-validator = "org.hibernate.validator:hibernate-validator:9.1.0.Final"
 jakarta-el = "org.glassfish:jakarta.el:4.0.2"
 # https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-engine/
-junit-jupiter-engine = "org.junit.jupiter:junit-jupiter-engine:6.0.1"
+junit-jupiter-engine = "org.junit.jupiter:junit-jupiter-engine:6.0.3"
 karibu-testing = "com.github.mvysny.kaributesting:karibu-testing-v24:2.7.0"
 karibu-dsl = "com.github.mvysny.karibudsl:karibu-dsl-v23:2.6.0"
 hikaricp = "com.zaxxer:HikariCP:7.0.2"
