@@ -1,11 +1,41 @@
 # Ktorm for Vaadin
 
-[Ktorm](https://www.ktorm.org/) bindings for [Vaadin](https://vaadin.com/). Provides support for binding Ktorm entities to
-forms via Vaadin binder, listing them in Grids and ComboBoxes via DataProvider,
-and listing the outcomes of SQL selects/joins in a Grid.
+[![Gradle](https://github.com/mvysny/ktorm-vaadin/actions/workflows/gradle.yml/badge.svg)](https://github.com/mvysny/ktorm-vaadin/actions/workflows/gradle.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.mvysny.ktorm-vaadin/ktorm-vaadin.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/com.github.mvysny.ktorm-vaadin/ktorm-vaadin)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Check out the example app [beverage-buddy-ktorm](https://github.com/mvysny/beverage-buddy-ktorm) to
-see this stuff in action.
+[Ktorm](https://www.ktorm.org/) bindings for [Vaadin](https://vaadin.com/). Glues Ktorm entities to
+Vaadin's UI primitives so you don't have to write the plumbing yourself.
+
+**Features:**
+
+- Bind Ktorm entities to forms via Vaadin `Binder`, with JSR-303 validation that respects
+  Ktorm's interface-based entities.
+- Back a `Grid` or `ComboBox` with `EntityDataProvider` — pagination, sorting, and filtering
+  are translated to SQL automatically.
+- Drive Grids off arbitrary joins / projections with `QueryDataProvider`.
+- Ready-made filter components (text, boolean, enum, date range, number range) that produce
+  Ktorm `ColumnDeclaring<Boolean>` expressions.
+- `ActiveEntity` mixin adds `save()`, `create()`, `validate()`, plus table-level DAO helpers
+  (`findAll`, `count`, `single`, `deleteAll`).
+
+See the bundled `:testapp` (run with `./gradlew :testapp:run`) or the larger
+[beverage-buddy-ktorm](https://github.com/mvysny/beverage-buddy-ktorm) example.
+
+**Requirements:** JDK 21+, Kotlin 2.3+, Vaadin 25.1+, Ktorm 4.1+. Licensed under [MIT](LICENSE).
+Contributions and bug reports welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Contents
+
+- [Adding to your project](#adding-to-your-project)
+- [Entities and DAOs](#entities-and-daos)
+- [Transactions and Active Entities](#transactions-and-active-entities)
+- [EntityDataProvider](#entitydataprovider)
+- [Joins via `QueryDataProvider`](#joins-via-querydataprovider)
+- [Grid Sorting](#grid-sorting)
+- [Grid Filters](#grid-filters)
+- [Forms](#forms)
+- [Further Documentation](#further-documentation)
 
 ## Adding to your project
 
@@ -25,7 +55,6 @@ To initialize the database, we'll add the start/stop listener:
 @WebListener
 class Bootstrap : ServletContextListener {
     // Called by Jetty when the app starts up.
-    @Override
     override fun contextInitialized(servletContextEvent: ServletContextEvent?) {
         log.info("Connecting to the database")
         val cfg = HikariConfig().apply {
@@ -47,7 +76,6 @@ class Bootstrap : ServletContextListener {
     }
 
     companion object {
-        @JvmStatic
         private val log = LoggerFactory.getLogger(Bootstrap::class.java)
         private lateinit var dataSource: HikariDataSource
     }
@@ -64,6 +92,39 @@ See `testapp`'s `Bootstrap.kt` file for a full example using FlyWay to create da
 Make sure to go through Ktorm documentation to learn how `Entity`-ies and `Table`s work.
 We'll bind entities to forms via Vaadin Binder, and we'll return Entity instances via DataProvider,
 so it's crucial that every table has an entity defined.
+
+## Transactions and Active Entities
+
+Every database call in ktorm-vaadin goes through the `db { }` block, which opens a Ktorm
+transaction against `ActiveKtorm.database` and exposes a `KtormContext(transaction, database)`
+to the block. The block commits on normal return and rolls back on exception:
+
+```kotlin
+val all: List<Employee> = db { database.sequenceOf(Employees).toList() }
+```
+
+For typical CRUD you don't need to call `db { }` directly — the `Table<E>` extension
+helpers in `dao.kt` wrap it for you:
+
+```kotlin
+Employees.create(Employee { name = "Alice" })
+Employees.findAll()      // List<Employee>
+Employees.count()         // Int
+Employees.single()        // single row, fails on 0 or 2+
+Employees.deleteAll()
+```
+
+If your entities extend `ActiveEntity<E>` (instead of plain `Entity<E>`), each instance also
+gets:
+
+- `validate()` — runs `jakarta.validation` constraints. Annotate getters (`@get:NotNull`,
+  `@get:Size(...)`) since Ktorm entities are interfaces.
+- `isValid` — `validate()` wrapped in try/catch.
+- `save()` — calls `flushChanges()` if the entity has a primary key, otherwise inserts a new row.
+- `create()` — always inserts.
+
+`ActiveEntity` requires each entity to expose its `Table<E>` via the `table` property. **Hibernate
+Validator 9+ is required** — HV 8 [doesn't run validators on interfaces](https://hibernate.atlassian.net/browse/HV-2018).
 
 ## EntityDataProvider
 
@@ -93,20 +154,20 @@ in where clauses. Unfortunately the values of joined entities do not seem to be 
 from Ktorm documentation, reading `Employee.department.name` will yield `null`. That's
 where `QueryDataProvider` comes into play.
 
-To hold a join of `Person` and `Address`:
+To hold a left-join of `Employee` and `Department` (taken verbatim from
+`testapp/src/main/kotlin/testapp/EmployeesRoute.kt`):
 ```kotlin
-data class PersonAddress(val person: Person, val address: Address) {
+data class EmployeeDept(val employee: Employee, val department: Department) {
     companion object {
-        fun from(row: QueryRowSet): PersonAddress = PersonAddress(
-            Persons.createEntity(row), Addresses.createEntity(row)
+        fun from(row: QueryRowSet): EmployeeDept = EmployeeDept(
+            Employees.createEntity(row), Departments.createEntity(row)
         )
-        val dataProvider: QueryDataProvider<PersonAddress> get() = QueryDataProvider(
-            { db -> db.from(Addresses).leftJoin(Persons, on = Addresses.of_person_id eq Persons.id)
-                .select(*Addresses.columns.toTypedArray(), *Persons.columns.toTypedArray())},
-            { row -> from(row) }
+        val dataProvider: QueryDataProvider<EmployeeDept> get() = QueryDataProvider(
+            { it.from(Employees).leftJoin(Departments, on = Employees.departmentId eq Departments.id)
+                .select(*Employees.columns.toTypedArray(), *Departments.columns.toTypedArray()) },
+            { from(it) }
         )
     }
-    override fun toString(): String = "${person.name}/${person.age}=${address.street}/${address.city}"
 }
 ```
 
@@ -116,11 +177,11 @@ You need to set the Grid Column key to the Ktorm Column name; that way we can re
 the Ktorm expression back from Vaadin's QuerySortOrder:
 
 ```kotlin
+// Pick `.e.key` when the Grid is backed by EntityDataProvider, `.q.key` for QueryDataProvider.
 val idColumn = personGrid.addColumn { it.id }
         .setHeader("ID")
         .setSortable(true)
-        .setKey(Persons.id.e.key) // When using EntityDataProvider
-    .setKey(Persons.id.q.key) // When using QueryDataProvider
+        .setKey(Persons.id.e.key) // or Persons.id.q.key for QueryDataProvider
 dataProvider.setSortOrders(listOf(Persons.name.e.asc, Persons.age.e.asc))
 ```
 
@@ -177,11 +238,29 @@ This project offers additional filter components:
 * `DateRangePopup`: allows the user to select a date range. The range may be open (only the 'from' or 'to' date filled in, but not both). Usually matched using the `between()` operator.
 * `NumberRangePopup`: allows the user to select a numeric range. The range may be open (only the 'from' or 'to' number filled in, but not both). Usually matched using the `between()` operator.
 
+> **Note on `ilike`:** the `withStringFilterOn(...)` helpers and several filter examples use
+> `org.ktorm.support.postgresql.ilike`. `ktorm-vaadin` pulls `ktorm-support-postgresql` in
+> transitively so the operator is always available — H2 understands `ilike` too, which is
+> why tests pass. If you target a database that doesn't (e.g. MySQL), substitute your own
+> case-insensitive comparison when composing the filter expression.
+
 ## Forms
 
 Ktorm entities are interfaces, but have all the usual getters/setters so that they work
 with the Binder. However, make sure to have Hibernate-Validator 9+ since HV 8
 [doesn't run validators on interfaces](https://hibernate.atlassian.net/browse/HV-2018).
+
+The form example below uses two helpers from [Karibu-DSL](https://github.com/mvysny/karibu-dsl)
+(not from ktorm-vaadin):
+
+- `beanValidationBinder<T>()` — a thin wrapper around Vaadin's `BeanValidationBinder<T>`.
+- `HasBinder<T>` — marker interface that lets `bind(binder)` find the binder from the
+  enclosing form. Implement it on your form class (as below) or pass the binder explicitly.
+
+The `bind(...)` and `toId(...)` calls inside the form are provided by ktorm-vaadin — see
+`binder.kt`. `bind(column)` binds the field to the entity property by **name** (rather than
+getter/setter lambdas) so that BeanValidationBinder can run JSR-303 against it; `toId(idColumn)`
+adapts an entity-valued field to a foreign-key `ID?` column.
 
 A very simple example of an employee form:
 
@@ -231,3 +310,7 @@ This project contains a bundled app named `testapp`. You can run it easily:
 $ ./gradlew testapp:run
 ```
 The sources are simple and easy to follow and demo all features of ktorm-vaadin.
+
+For development setup, running tests, and release procedure see [CONTRIBUTING.md](CONTRIBUTING.md).
+Underlying APIs are documented in the [Ktorm docs](https://www.ktorm.org/) and the
+[Vaadin Binder docs](https://vaadin.com/docs/latest/flow/binding-data/components-binder).
