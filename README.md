@@ -12,7 +12,7 @@ see this stuff in action.
 First, add a dependency on ktorm-vaadin to your project:
 ```groovy
 dependencies {
-  implementation("com.github.mvysny.ktorm-vaadin:ktorm-vaadin:0.1")
+  implementation("com.github.mvysny.ktorm-vaadin:ktorm-vaadin:0.2")
 }
 ```
 ktorm-vaadin pulls in Ktorm, Hibernate-Validator for JSR-303 validation, but you
