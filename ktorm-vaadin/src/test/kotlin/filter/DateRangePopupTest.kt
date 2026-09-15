@@ -1,11 +1,14 @@
 package com.github.mvysny.ktormvaadin.filter
 
 import com.github.mvysny.kaributesting.v10.*
+import com.github.mvysny.ktormvaadin.utils.PopupButton
+import com.vaadin.flow.component.UI
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.Locale
 import kotlin.test.expect
 import kotlin.test.fail
 
@@ -56,6 +59,63 @@ class DateRangePopupTest {
             } .remove()
             component._value = DateInterval(LocalDate.now(), LocalDate.now().plusDays(1))
         }
+    }
+
+    /**
+     * The button caption is the only thing the user sees when the popup is closed.
+     */
+    @Nested inner class CaptionTests {
+        private val jan2 = LocalDate.of(2024, 1, 2)
+        private val jan16 = LocalDate.of(2024, 1, 16)
+        private fun captionOf(popup: DateRangePopup): String = popup._get<PopupButton>().caption
+
+        @Test fun `universal set shows All`() {
+            expect("All") { captionOf(component) }
+            component._value = DateInterval(jan2, jan16)
+            component._value = DateInterval.UNIVERSAL
+            expect("All") { captionOf(component) }
+        }
+
+        @Test fun `bound interval`() {
+            UI.getCurrent().locale = Locale.US
+            component._value = DateInterval(jan2, jan16)
+            expect("1/2/24 - 1/16/24") { captionOf(component) }
+        }
+
+        @Test fun `unbound side is left empty`() {
+            UI.getCurrent().locale = Locale.US
+            component._value = DateInterval(jan2, null)
+            expect("1/2/24 - ") { captionOf(component) }
+            component._value = DateInterval(null, jan16)
+            expect(" - 1/16/24") { captionOf(component) }
+        }
+
+        /**
+         * The date format follows the UI locale: the caption may end up in a Grid header
+         * of a localized app.
+         */
+        @Test fun `dates are formatted in the UI locale`() {
+            UI.getCurrent().locale = Locale.US
+            component._value = DateInterval(jan2, jan16)
+            val us = captionOf(component)
+
+            UI.getCurrent().locale = Locale.GERMANY
+            val germanPopup = DateRangePopup()
+            germanPopup._value = DateInterval(jan2, jan16)
+            val german = captionOf(germanPopup)
+
+            expect(true, "expected different formatting, got '$us' and '$german'") { us != german }
+        }
+    }
+
+    @Test fun `read-only propagates to the fields in the popup`() {
+        expect(false) { component.fromField.isReadOnly }
+        component.isReadOnly = true
+        expect(true) { component.fromField.isReadOnly }
+        expect(true) { component.toField.isReadOnly }
+        component.isReadOnly = false
+        expect(false) { component.fromField.isReadOnly }
+        expect(false) { component.toField.isReadOnly }
     }
 
     @Nested inner class PopupTests {

@@ -7,12 +7,15 @@ import com.github.mvysny.kaributools.fetchAll
 import com.github.mvysny.kaributools.sort
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.data.provider.Query
+import com.vaadin.flow.data.provider.QuerySortOrder
+import com.vaadin.flow.data.provider.SortDirection
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.jetbrains.annotations.NotNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.ktorm.dsl.QueryRowSet
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.from
@@ -100,6 +103,36 @@ class QueryDataProviderTest : AbstractDbTest() {
         expectList("test 1/0=street 0/city 0", "test 10/9=street 9/city 9") { dp.fetchFilter("test 1").map { it.toString() }}
         expect(10) { dp.sizeFilter("test ")}
     }
+    /**
+     * A Grid column key must be [QueryDataProviderColumnKey.key]; anything else must fail
+     * loudly rather than silently sort by something else.
+     */
+    @Test
+    fun sortingByUnknownExpressionFails() {
+        assertThrows<IllegalStateException> {
+            e.fetchSortBy(QuerySortOrder("unknown", SortDirection.ASCENDING))
+        }
+    }
+
+    /**
+     * [EntityDataProvider] keys don't work here: [QueryDataProvider] sorts by the select's
+     * expressions, not by column names.
+     */
+    @Test
+    fun sortingByEntityDataProviderKeyFails() {
+        assertThrows<IllegalStateException> {
+            e.fetchSortBy(Persons.name.e.asc)
+        }
+    }
+
+    @Test
+    fun blankStringFilterMatchesEverything() {
+        val dp = e.withStringFilterOn(Persons.name)
+        expect(10) { dp.sizeFilter("") }
+        expect(10) { dp.sizeFilter("   ") }
+        expect(10) { dp.sizeFilter(null) }
+    }
+
     @Test
     fun testWithGridSorting() {
        val g = Grid<PersonAddress>()

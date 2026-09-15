@@ -29,7 +29,7 @@ import org.ktorm.support.postgresql.ilike
   */
 @Route("departments", layout = MainLayout::class)
 class DepartmentsRoute : KComposite() {
-    private val idFilter = NumberRangePopup()
+    private val idFilter = NumberRangePopup("id_filter")
     private val nameFilter = FilterTextField("name_filter")
     private val locationFilter = FilterTextField("location_filter")
     private val dataProvider = Departments.dataProvider

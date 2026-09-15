@@ -1,6 +1,7 @@
 package com.github.mvysny.ktormvaadin.filter
 
 import com.github.mvysny.kaributesting.v10.*
+import com.github.mvysny.ktormvaadin.utils.PopupButton
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -57,6 +58,50 @@ class NumberRangePopupTest {
             } .remove()
             component._value = NumberInterval(5.0, 25.0)
         }
+    }
+
+    /**
+     * The button caption is the only thing the user sees when the popup is closed.
+     */
+    @Nested inner class CaptionTests {
+        private val caption: String get() = component._get<PopupButton>().caption
+
+        @Test fun `universal set shows All`() {
+            expect("All") { caption }
+            component._value = NumberInterval(5.0, 25.0)
+            component._value = NumberInterval(null, null)
+            expect("All") { caption }
+        }
+
+        @Test fun `single item`() {
+            component._value = NumberInterval(5.0, 5.0)
+            expect("[x] = 5.0") { caption }
+        }
+
+        @Test fun `bound interval`() {
+            component._value = NumberInterval(5.0, 25.0)
+            expect("5.0 ≤ [x] ≤ 25.0") { caption }
+        }
+
+        @Test fun `lower bound only`() {
+            component._value = NumberInterval(5.0, null)
+            expect("[x] ≥ 5.0") { caption }
+        }
+
+        @Test fun `upper bound only`() {
+            component._value = NumberInterval(null, 25.0)
+            expect("[x] ≤ 25.0") { caption }
+        }
+    }
+
+    @Test fun `read-only propagates to the fields in the popup`() {
+        expect(false) { component.fromField.isReadOnly }
+        component.isReadOnly = true
+        expect(true) { component.fromField.isReadOnly }
+        expect(true) { component.toField.isReadOnly }
+        component.isReadOnly = false
+        expect(false) { component.fromField.isReadOnly }
+        expect(false) { component.toField.isReadOnly }
     }
 
     @Nested inner class PopupTests {

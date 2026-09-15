@@ -1,6 +1,7 @@
 package com.github.mvysny.ktormvaadin
 
 import com.github.mvysny.kaributesting.v10._value
+import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.combobox.ComboBox
 import com.vaadin.flow.component.textfield.IntegerField
 import com.vaadin.flow.component.textfield.TextField
@@ -9,6 +10,10 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.ktorm.entity.Entity
+import org.ktorm.schema.Table
+import org.ktorm.schema.boolean
+import org.ktorm.schema.int
 import kotlin.test.expect
 
 class BinderTests {
@@ -44,6 +49,28 @@ class BinderTests {
             form.binder.writeBean(p)
             expect("Rimmer") { p.name }
             expect(35) { p.age }
+        }
+    }
+
+    /**
+     * A Kotlin property named `isActive` is named `active` in the Java bean property set
+     * which [com.vaadin.flow.data.binder.Binder] uses; [bind] must perform the conversion.
+     */
+    @Nested inner class isPrefixedPropertyTests {
+        @Test
+        fun valuePropagatedFromBeanToForm() {
+            val form = RobotForm()
+            form.binder.readBean(Robot { isActive = true })
+            expect(true) { form.activeField.value }
+        }
+
+        @Test
+        fun valuePropagatedFromFormToBean() {
+            val form = RobotForm()
+            form.activeField.value = true
+            val robot = Robot {}
+            form.binder.writeBean(robot)
+            expect(true) { robot.isActive }
         }
     }
 
@@ -100,6 +127,34 @@ class BinderTests {
             expect(person.id) { address.of_person_id }
         }
     }
+}
+
+/**
+ * Minimal form for [Robot], to test the binding of a property whose name starts with "is".
+ */
+class RobotForm {
+    val activeField = Checkbox()
+    val binder = BeanValidationBinder(Robot::class.java)
+    init {
+        binder.forField(activeField).bind(Robots.isActive)
+    }
+}
+
+/**
+ * Never created in the database: the binding to [Robot] is resolved from the column
+ * bindings alone.
+ */
+object Robots : Table<Robot>("robot") {
+    val id = int("ID").primaryKey().bindTo { it.id }
+    val isActive = boolean("ACTIVE").bindTo { it.isActive }
+}
+
+interface Robot : ActiveEntity<Robot> {
+    val id: Int?
+    var isActive: Boolean
+
+    override val table: Table<Robot> get() = Robots
+    companion object : Entity.Factory<Robot>()
 }
 
 /**

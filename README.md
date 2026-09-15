@@ -242,6 +242,20 @@ This project offers additional filter components:
 * `DateRangePopup`: allows the user to select a date range. The range may be open (only the 'from' or 'to' date filled in, but not both). Usually matched using the `between()` operator.
 * `NumberRangePopup`: allows the user to select a numeric range. The range may be open (only the 'from' or 'to' number filled in, but not both). Usually matched using the `between()` operator.
 
+`BooleanFilterField` and `EnumFilterField` have no `between()` helper since they map
+straight onto `eq`/`inList`; both express "don't filter" as a value you must check for:
+
+```kotlin
+// an empty selection means "don't filter"; so does a selection of every constant.
+if (!maritalStatusFilter.isAllOrNothingSelected) {
+    conditions += Employees.maritalStatus.inList(maritalStatusFilter.selectedItems.toList())
+}
+val remote = remoteFilter.value
+if (remote != null) {
+    conditions += Employees.remote eq remote
+}
+```
+
 > **Note on `ilike`:** the `withStringFilterOn(...)` helpers and several filter examples use
 > `org.ktorm.support.postgresql.ilike`. `ktorm-vaadin` pulls `ktorm-support-postgresql` in
 > transitively so the operator is always available — H2 understands `ilike` too, which is

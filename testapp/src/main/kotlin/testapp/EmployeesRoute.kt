@@ -8,7 +8,9 @@ import com.github.mvysny.ktormvaadin.QueryDataProvider
 import com.github.mvysny.ktormvaadin.and
 import com.github.mvysny.ktormvaadin.bind
 import com.github.mvysny.ktormvaadin.dataProvider
+import com.github.mvysny.ktormvaadin.filter.BooleanFilterField
 import com.github.mvysny.ktormvaadin.filter.DateRangePopup
+import com.github.mvysny.ktormvaadin.filter.EnumFilterField
 import com.github.mvysny.ktormvaadin.filter.FilterTextField
 import com.github.mvysny.ktormvaadin.filter.NumberRangePopup
 import com.github.mvysny.ktormvaadin.filter.between
@@ -23,6 +25,7 @@ import com.vaadin.flow.router.Route
 import org.ktorm.dsl.QueryRowSet
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.from
+import org.ktorm.dsl.inList
 import org.ktorm.dsl.leftJoin
 import org.ktorm.dsl.select
 import org.ktorm.schema.ColumnDeclaring
@@ -33,12 +36,14 @@ import org.ktorm.support.postgresql.ilike
  */
 @Route("", layout = MainLayout::class)
 class EmployeesRoute : KComposite() {
-    private val idFilter = NumberRangePopup()
+    private val idFilter = NumberRangePopup("id_filter")
     private val nameFilter = FilterTextField("name_filter")
     private val jobFilter = FilterTextField("job_filter")
-    private val hireDateFilter = DateRangePopup()
-    private val salaryFilter = NumberRangePopup()
+    private val hireDateFilter = DateRangePopup("hiredate_filter")
+    private val salaryFilter = NumberRangePopup("salary_filter")
     private val deptFilter = FilterTextField("dept_filter")
+    private val maritalStatusFilter = EnumFilterField(MaritalStatus::class.java, "marital_status_filter")
+    private val remoteFilter = BooleanFilterField("remote_filter")
     private val dataProvider = EmployeeDept.dataProvider
 
     val root = ui {
@@ -86,6 +91,18 @@ class EmployeesRoute : KComposite() {
                     isSortable = true
                     filterBar.getCell(this).component = deptFilter
                 }
+                column({ it.employee.maritalStatus }) {
+                    setHeader("Marital status")
+                    key = Employees.maritalStatus.q.key
+                    isSortable = true
+                    filterBar.getCell(this).component = maritalStatusFilter
+                }
+                column({ it.employee.remote }) {
+                    setHeader("Remote")
+                    key = Employees.remote.q.key
+                    isSortable = true
+                    filterBar.getCell(this).component = remoteFilter
+                }
                 sort(nameCol.asc, salaryCol.desc)
                 addItemClickListener { if (it.item != null) edit(it.item) }
             }
@@ -99,6 +116,8 @@ class EmployeesRoute : KComposite() {
         hireDateFilter.addValueChangeListener { update() }
         salaryFilter.addValueChangeListener { update() }
         deptFilter.addValueChangeListener { update() }
+        maritalStatusFilter.addValueChangeListener { update() }
+        remoteFilter.addValueChangeListener { update() }
     }
 
     private fun update() {
@@ -114,6 +133,14 @@ class EmployeesRoute : KComposite() {
         conditions += Employees.salary.between(salaryFilter.value.asLongInterval())
         if (deptFilter.value.isNotBlank()) {
             conditions += Departments.name.ilike(deptFilter.value.trim() + "%")
+        }
+        // an empty selection means "don't filter"; so does a selection of every constant.
+        if (!maritalStatusFilter.isAllOrNothingSelected) {
+            conditions += Employees.maritalStatus.inList(maritalStatusFilter.selectedItems.toList())
+        }
+        val remote = remoteFilter.value
+        if (remote != null) {
+            conditions += Employees.remote eq remote
         }
         dataProvider.setFilter(conditions.and())
     }
@@ -169,6 +196,15 @@ class EmployeeForm : FormLayout(), HasBinder<Employee> {
         integerField("Salary") {
             setId("salary")
             bind(binder).withConverter(IntegerToLongConverter()).bind(Employees.salary)
+        }
+        comboBox<MaritalStatus>("Marital status") {
+            setId("maritalStatus")
+            setItems(*MaritalStatus.entries.toTypedArray())
+            bind(binder).bind(Employees.maritalStatus)
+        }
+        checkBox("Remote") {
+            setId("remote")
+            bind(binder).bind(Employees.remote)
         }
         comboBox<Department>("Department") {
             setId("department")

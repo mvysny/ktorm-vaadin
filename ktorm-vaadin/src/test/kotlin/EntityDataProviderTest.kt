@@ -12,6 +12,8 @@ import com.vaadin.flow.data.provider.QuerySortOrder
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import com.vaadin.flow.data.provider.SortDirection
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.gte
 import org.ktorm.dsl.lte
@@ -98,6 +100,38 @@ class EntityDataProviderTest : AbstractDbTest() {
         expectList("test 1", "test 10") { dp.fetchFilter("test 1").map { it.name }}
         expect(10) { dp.sizeFilter("test ")}
     }
+    /**
+     * A Grid column key must be [EntityDataProviderColumnKey.key], that is the Ktorm
+     * column name; anything else must fail loudly rather than silently sort by something else.
+     */
+    @Test
+    fun sortingByUnknownColumnKeyFails() {
+        val ex = assertThrows<RuntimeException> {
+            e.fetchSortBy(QuerySortOrder("unknown", SortDirection.ASCENDING))
+        }
+        expect(true, ex.message) { ex.message!!.contains("No column with name unknown") }
+    }
+
+    /**
+     * The bean property name is not the column name: the [Persons.id] property is named
+     * "id" while the column is named "ID".
+     */
+    @Test
+    fun sortingByPropertyNameFails() {
+        assertThrows<RuntimeException> {
+            e.fetchSortBy(QuerySortOrder("id", SortDirection.ASCENDING))
+        }
+        expect(10) { e.fetchSortBy(Persons.id.e.asc).size }
+    }
+
+    @Test
+    fun blankStringFilterMatchesEverything() {
+        val dp = e.withStringFilterOn(Persons.name)
+        expect(10) { dp.sizeFilter("") }
+        expect(10) { dp.sizeFilter("   ") }
+        expect(10) { dp.sizeFilter(null) }
+    }
+
     @Test
     fun testWithGridSorting() {
        val g = Grid<Person>()

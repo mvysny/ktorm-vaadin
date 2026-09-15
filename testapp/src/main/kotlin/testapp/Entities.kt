@@ -26,6 +26,17 @@ object Employees : Table<Employee>("t_employee") {
     val hireDate = date("hire_date").bindTo { it.hireDate }
     val salary = long("salary").bindTo { it.salary }
     val departmentId = int("department_id").bindTo { it.departmentId }
+    val maritalStatus = enum<MaritalStatus>("marital_status").bindTo { it.maritalStatus }
+    val remote = boolean("remote").bindTo { it.remote }
+}
+
+/**
+ * Demoes [com.github.mvysny.ktormvaadin.filter.EnumFilterField].
+ */
+enum class MaritalStatus {
+    Single,
+    Married,
+    Divorced
 }
 
 interface Department : ActiveEntity<Department> {
@@ -67,6 +78,12 @@ interface Employee : ActiveEntity<Employee> {
 
     @get:NotNull
     var departmentId: Int
+
+    @get:NotNull
+    var maritalStatus: MaritalStatus?
+
+    @get:NotNull
+    var remote: Boolean
     override val table: Table<Employee> get() = Employees
 
     companion object : Entity.Factory<Employee>()
@@ -87,12 +104,16 @@ fun demoData() {
             Employee {
                 name = "Manager $it"; job = "Manager"; hireDate = LocalDate.of(2025, 11, 12)
                 salary = 6000 + it.toLong(); departmentId = departments.random().id
+                maritalStatus = MaritalStatus.entries[it % MaritalStatus.entries.size]
+                remote = it % 2 == 0
             }.apply { create() }
         }
         (0..100).map {
             Employee {
                 name = "Employee $it"; job = "Employee"; hireDate = LocalDate.of(2025, 11, 12)
                 salary = 6000 + it.toLong(); departmentId = departments.random().id
+                maritalStatus = MaritalStatus.entries[it % MaritalStatus.entries.size]
+                remote = it % 2 == 0
             }.apply { create() }
         }
     }
