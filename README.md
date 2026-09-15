@@ -5,7 +5,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 [Ktorm](https://www.ktorm.org/) bindings for [Vaadin](https://vaadin.com/). Glues Ktorm entities to
-Vaadin's UI primitives so you don't have to write the plumbing yourself.
+Vaadin's UI primitives so you don't have to write the plumbing yourself. Ktorm owns the SQL DSL,
+the entity model and the transaction; Vaadin owns the components. This project owns the glue: the
+DataProviders that turn a Grid's paging, sorting and filtering into SQL, the name-based `Binder`
+bridge that keeps JSR-303 working on interface entities, and filter components that produce Ktorm
+`WHERE` fragments.
 
 **Features:**
 

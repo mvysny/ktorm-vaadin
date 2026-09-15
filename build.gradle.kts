@@ -25,12 +25,20 @@ allprojects {
     }
 }
 
+// The doc-layer tripwires: caps, cites, the CLAUDE.md symlinks. See AGENTS.md, "Design docs".
+val designTripwires by tasks.registering(Exec::class) {
+    group = "verification"
+    description = "Checks the design docs described in AGENTS.md."
+    commandLine("./design/verify_design_tripwires.sh")
+}
+
 subprojects {
     apply {
         plugin("maven-publish")
         plugin("kotlin")
         plugin("org.gradle.signing")
     }
+    tasks.named("check") { dependsOn(designTripwires) }
     java {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
