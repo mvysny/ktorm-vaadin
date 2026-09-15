@@ -19,6 +19,9 @@ import org.junit.jupiter.api.assertThrows
 import org.ktorm.dsl.QueryRowSet
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.from
+import org.ktorm.dsl.isNotNull
+import org.ktorm.dsl.union
+import org.ktorm.dsl.where
 import org.ktorm.dsl.gte
 import org.ktorm.dsl.leftJoin
 import org.ktorm.dsl.lte
@@ -123,6 +126,34 @@ class QueryDataProviderTest : AbstractDbTest() {
         assertThrows<IllegalStateException> {
             e.fetchSortBy(Persons.name.e.asc)
         }
+    }
+
+    /**
+     * The sorted column need not be selected as-is: it may sit deeper in the select's
+     * expression tree, here as the operand of an `is not null` expression.
+     */
+    @Test
+    fun sortingByAnExpressionNestedInTheSelect() {
+        val dp = QueryDataProvider(
+            { it.from(Persons).select(Persons.name, Persons.age.isNotNull().aliased("has_age")) },
+            { it[Persons.name]!! }
+        )
+        expectList("test 10", "test 9") { dp.fetchSortBy(Persons.age.q.desc).take(2) }
+    }
+
+    /**
+     * Sorting must look into both sides of a union.
+     */
+    @Test
+    fun sortingAUnionQuery() {
+        val dp = QueryDataProvider(
+            { db ->
+                db.from(Persons).select(Persons.name).where(Persons.age lte 4)
+                    .union(db.from(Persons).select(Persons.name).where(Persons.age gte 5))
+            },
+            { it[Persons.name]!! }
+        )
+        expectList("test 9", "test 8") { dp.fetchSortBy(Persons.name.q.desc).take(2) }
     }
 
     @Test

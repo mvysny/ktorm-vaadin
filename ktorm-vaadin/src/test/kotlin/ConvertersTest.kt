@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import kotlin.test.expect
 
 class ConvertersTest : AbstractDbTest() {
@@ -24,6 +25,18 @@ class ConvertersTest : AbstractDbTest() {
         }
 
         val c = EntityToIdConverter(Persons.id, Person::class)
+
+        /**
+         * A mismatch would only show up as a ClassCastException somewhere deep in the
+         * conversion, so the converter rejects it upfront.
+         */
+        @Test
+        fun idColumnFromAnotherTableIsRejected() {
+            val ex = assertThrows<IllegalArgumentException> {
+                EntityToIdConverter(Persons.id, Address::class)
+            }
+            expect(true, ex.message) { ex.message!!.contains("but class com.github.mvysny.ktormvaadin.Address was expected") }
+        }
 
         @Test
         fun convertNullToIdReturnsNull() {

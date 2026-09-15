@@ -42,6 +42,8 @@ class DaoTest : AbstractDbTest() {
         assertThrows<RuntimeException> { Persons.single() }
         val p = Persons.create(Person { name = "Jon"; age = 25 })
         expect(p) { Persons.single() }
+        Persons.create(Person { name = "Jim"; age = 30 })
+        assertThrows<RuntimeException> { Persons.single() }
     }
     @Test
     fun deleteAll() {
