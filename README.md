@@ -40,6 +40,7 @@ Contributions and bug reports welcome — see [CONTRIBUTING.md](CONTRIBUTING.md)
 - [Grid Sorting](#grid-sorting)
 - [Grid Filters](#grid-filters)
 - [Forms](#forms)
+- [Other helpers](#other-helpers)
 - [Further Documentation](#further-documentation)
 
 ## Adding to your project
@@ -50,9 +51,12 @@ dependencies {
   implementation("com.github.mvysny.ktorm-vaadin:ktorm-vaadin:0.2")
 }
 ```
-ktorm-vaadin pulls in Ktorm, Hibernate-Validator for JSR-303 validation, but you
-also want to add [Hikari-CP](https://github.com/brettwooldridge/HikariCP) for connection pooling,
-and [FlyWay](https://github.com/flyway/flyway) for keeping your database up-to-speed.
+ktorm-vaadin pulls in Ktorm and Hibernate-Validator for JSR-303 validation. Vaadin itself is a
+`compileOnly` dependency — you bring your own version. You also want to add
+[Hikari-CP](https://github.com/brettwooldridge/HikariCP) for connection pooling,
+and [FlyWay](https://github.com/flyway/flyway) for keeping your database up-to-speed;
+the [Forms](#forms) example below additionally uses
+[Karibu-DSL](https://github.com/mvysny/karibu-dsl).
 
 To initialize the database, we'll add the start/stop listener:
 ```kotlin
@@ -98,6 +102,39 @@ Make sure to go through Ktorm documentation to learn how `Entity`-ies and `Table
 We'll bind entities to forms via Vaadin Binder, and we'll return Entity instances via DataProvider,
 so it's crucial that every table has an entity defined.
 
+The entity is an interface and the `Table` object maps it to columns, exactly as Ktorm documents.
+Extend `ActiveEntity<E>` rather than Ktorm's `Entity<E>` to get `save()`/`create()`/`validate()`;
+that adds one obligation, the `table` property:
+
+```kotlin
+object Departments : Table<Department>("t_department") {
+    val id = int("id").primaryKey().bindTo { it.id }
+    val name = varchar("name").bindTo { it.name }
+    val location = varchar("location").bindTo { it.location }
+}
+
+interface Department : ActiveEntity<Department> {
+    val id: Int
+
+    // the JSR-303 annotations go on the getter: an entity is an interface and has no field.
+    @get:NotNull
+    @get:Size(min = 1, max = 255)
+    var name: String
+
+    @get:NotNull
+    var location: String
+
+    override val table: Table<Department> get() = Departments
+
+    // lets you write Department { name = "Marketing"; location = "Turku" }
+    companion object : Entity.Factory<Department>()
+}
+```
+
+These are ordinary Ktorm entities: `flushChanges()`, `delete()` and the `sequenceOf()` DSL keep
+working as Ktorm documents them. See `testapp/src/main/kotlin/testapp/Entities.kt` for the full
+set used throughout this README.
+
 ## Transactions and Active Entities
 
 Every database call in ktorm-vaadin goes through the `db { }` block, which opens a Ktorm
@@ -125,6 +162,7 @@ gets:
 - `validate()` — runs `jakarta.validation` constraints. Annotate getters (`@get:NotNull`,
   `@get:Size(...)`) since Ktorm entities are interfaces.
 - `isValid` — `validate()` wrapped in try/catch.
+- `hasId` — true when the entity's primary key property is set.
 - `save()` — calls `flushChanges()` if the entity's primary key property is set, otherwise
   inserts a new row. Pass `save(validate = false)` to skip the JSR-303 check.
 - `create()` — always inserts.
@@ -158,7 +196,8 @@ When using [Ktorm Reference Bindings](https://www.ktorm.org/en/entity-finding.ht
 you can use `EntityDataProvider` to select one main entity and then reference all left-joined columns
 in where clauses. Unfortunately the values of joined entities do not seem to be populated; for example when selecting `Employee`s
 from Ktorm documentation, reading `Employee.department.name` will yield `null`. That's
-where `QueryDataProvider` comes into play.
+where `QueryDataProvider` comes into play. (This is observed behavior rather than something Ktorm
+documents; see `R_ktorm_joined_entity_values` in [design/research.md](design/research.md).)
 
 To hold a left-join of `Employee` and `Department` (taken verbatim from
 `testapp/src/main/kotlin/testapp/EmployeesRoute.kt`):
@@ -325,6 +364,32 @@ class EmployeeForm : FormLayout(), HasBinder<Employee> {
 Notice how the Manager and Department ComboBoxes populate themselves, and how they
 bind to an `Int` field which holds the ID of the manager/department.
 
+## Other helpers
+
+* **Raw SQL inside `db { }`**: `ddl()` runs a DDL or update statement, `sql()` runs a query and
+  maps every row. Both use the transaction's JDBC connection, so guard against SQL injection
+  yourself:
+  ```kotlin
+  db {
+      ddl("create table if not exists audit(id int primary key, msg varchar)")
+      val total: Long = sql("select sum(salary) from t_employee where job = ?",
+          { setString(1, "Manager") }) { it.getLong(1) } .firstOrNull() ?: 0L
+  }
+  ```
+* **`Collection<ColumnDeclaring<Boolean>?>.and()`**: ANDs a list of conditions, dropping the nulls
+  and returning `null` when nothing remains — that's what the filter examples above call.
+* **`withStringFilter { }`**: `withStringFilterOn(column)` for the cases where you build the where
+  clause yourself, e.g. to search two columns at once:
+  ```kotlin
+  setItems(Employees.dataProvider.withStringFilter {
+      Employees.name.ilike("$it%") or Employees.job.ilike("$it%")
+  })
+  ```
+* **`ActiveKtorm.validator`**: swap in your own `jakarta.validation.Validator`.
+* Every filter component takes an optional id (`FilterTextField("name_filter")`), which is handy
+  in UI tests; `EnumFilterField` takes the enum class as well:
+  `EnumFilterField(MaritalStatus::class.java, "marital_status_filter")`.
+
 ## Further Documentation
 
 This project contains a bundled app named `testapp`. You can run it easily:
@@ -336,3 +401,12 @@ The sources are simple and easy to follow and demo all features of ktorm-vaadin.
 For development setup, running tests, and release procedure see [CONTRIBUTING.md](CONTRIBUTING.md).
 Underlying APIs are documented in the [Ktorm docs](https://www.ktorm.org/) and the
 [Vaadin Binder docs](https://vaadin.com/docs/latest/flow/binding-data/components-binder).
+
+If you're changing ktorm-vaadin itself, the `design/` folder explains it:
+
+* [design/architecture.md](design/architecture.md) — how the pieces compose: the wiring, the
+  dependency direction, the flows.
+* [design/decisions.md](design/decisions.md) — why this and not that, e.g. why one global
+  `Database`, or why `ilike` comes from `ktorm-support-postgresql`.
+* [design/research.md](design/research.md) — what Ktorm, Vaadin and Hibernate Validator actually
+  do, each finding with its provenance.
