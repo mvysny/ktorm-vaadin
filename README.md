@@ -20,13 +20,14 @@ bridge that keeps JSR-303 working on interface entities, and filter components t
 - Drive Grids off arbitrary joins / projections with `QueryDataProvider`.
 - Ready-made filter components (text, boolean, enum, date range, number range) that produce
   Ktorm `ColumnDeclaring<Boolean>` expressions.
-- `ActiveEntity` mixin adds `save()`, `create()`, `validate()`, plus table-level DAO helpers
-  (`findAll`, `count`, `single`, `deleteAll`).
+- `ActiveEntity` mixin adds `save()`, `create()` and `validate()` to your entities; the
+  table-level DAO helpers (`findAll`, `count`, `single`, `deleteAll`) work on any Ktorm `Entity`.
 
 See the bundled `:testapp` (run with `./gradlew :testapp:run`) or the larger
 [beverage-buddy-ktorm](https://github.com/mvysny/beverage-buddy-ktorm) example.
 
-**Requirements:** JDK 21+, Kotlin 2.3+, Vaadin 25.1+, Ktorm 4.1+. Licensed under [MIT](LICENSE).
+**Requirements:** JDK 21+, Kotlin 2.4+, Vaadin 25.2+, Ktorm 4.1+ (CI builds against Vaadin
+25.2.6 only; other versions are untested). Licensed under [MIT](LICENSE).
 Contributions and bug reports welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Contents
@@ -124,7 +125,8 @@ gets:
 - `validate()` — runs `jakarta.validation` constraints. Annotate getters (`@get:NotNull`,
   `@get:Size(...)`) since Ktorm entities are interfaces.
 - `isValid` — `validate()` wrapped in try/catch.
-- `save()` — calls `flushChanges()` if the entity has a primary key, otherwise inserts a new row.
+- `save()` — calls `flushChanges()` if the entity's primary key property is set, otherwise
+  inserts a new row. Pass `save(validate = false)` to skip the JSR-303 check.
 - `create()` — always inserts.
 
 `ActiveEntity` requires each entity to expose its `Table<E>` via the `table` property. **Hibernate
@@ -148,7 +150,7 @@ To set the data provider to your ComboBox:
 val dp: EntityDataProvider<Person> = Persons.dataProvider
 // optionally set an unremovable filter, to always filter the records.
 dp.setFilter(Persons.age gte 18)
-comboBox.setDataProvider(dp.withStringFilterOn(Persons.name))
+comboBox.setItems(dp.withStringFilterOn(Persons.name))
 ```
 ## Joins via `QueryDataProvider`
 
@@ -177,8 +179,10 @@ data class EmployeeDept(val employee: Employee, val department: Department) {
 
 ## Grid Sorting
 
-You need to set the Grid Column key to the Ktorm Column name; that way we can reconstruct
-the Ktorm expression back from Vaadin's QuerySortOrder:
+You need to set the Grid Column key to the key its data provider expects — `.e.key`, the Ktorm
+column name, for `EntityDataProvider`; `.q.key`, the rendered column expression, for
+`QueryDataProvider`. That way we can reconstruct the Ktorm expression back from Vaadin's
+QuerySortOrder:
 
 ```kotlin
 // Pick `.e.key` when the Grid is backed by EntityDataProvider, `.q.key` for QueryDataProvider.
@@ -238,7 +242,7 @@ This project offers additional filter components:
 
 * `BooleanFilterField`: allows the user to select `true` or `false` or clear the selection and disable this filter.
 * `EnumFilterField`: allows the user to select one or more enum constants. If all constants or no constant is selected, the filter is disabled.
-* `FilterTextField`: a simple TextField filter. Usually matched with a column using the `likeIgnoreCase()` operator.
+* `FilterTextField`: a simple TextField filter. Usually matched with a column using the `ilike` operator.
 * `DateRangePopup`: allows the user to select a date range. The range may be open (only the 'from' or 'to' date filled in, but not both). Usually matched using the `between()` operator.
 * `NumberRangePopup`: allows the user to select a numeric range. The range may be open (only the 'from' or 'to' number filled in, but not both). Usually matched using the `between()` operator.
 

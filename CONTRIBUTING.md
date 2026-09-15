@@ -4,7 +4,8 @@ Please feel free to open bug reports to discuss new features; PRs are welcome as
 
 # Running tests
 
-To run all tests on all Vaadin versions, simply run `./gradlew test`.
+To run all tests, simply run `./gradlew test`. Everything is tested against the single Vaadin
+version pinned in `gradle/libs.versions.toml`.
 
 # Releasing
 

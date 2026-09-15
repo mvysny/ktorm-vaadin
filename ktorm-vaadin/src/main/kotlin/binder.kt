@@ -30,18 +30,20 @@ fun <BEAN, FIELDVALUE:Any> Binder.BindingBuilder<BEAN, FIELDVALUE?>.bind(column:
  * Converts an entity to its ID and back. Useful for combo boxes which shows a list of entities as their options while being bound to a
  * field containing ID of that entity:
  * ```kotlin
- * interface Category(override var id: Long? = null, var name: String = "") : Entity<Long>
- * interface Review(override var id: Long? = null, var category: Long? = null) : Entity<Long>
+ * interface Category : Entity<Category> { val id: Int; var name: String }
+ * interface Review : Entity<Review> { val id: Int; var categoryId: Int? }
  *
  * // editing the Review, we want the user to be able to choose the Review's category
  * val binder = BeanValidationBinder(Review::class.java)
- * categoryBox = comboBox("Choose a category") {
- *     setItemLabelGenerator { it.name }
+ * categoryBox = comboBox<Category>("Choose a category") {
+ *     itemLabelGenerator = ItemLabelGenerator { it.name }
  *     isAllowCustomValue = false
- *     dataProvider = Categories.dataProvider
- *     bind(binder).toId().bind(Reviews.category)
+ *     setItems(Categories.dataProvider.withStringFilterOn(Categories.name))
+ *     bind(binder).toId(Categories.id).bind(Reviews.categoryId)
  * }
  * ```
+ * @param idColumn the ID column of the entity shown in the field; its table must produce
+ * [ENTITY], otherwise [IllegalArgumentException] is thrown.
  */
 inline fun <BEAN, ID: Any, reified ENTITY: Entity<ENTITY>> Binder.BindingBuilder<BEAN, ENTITY?>.toId(idColumn: Column<ID>): Binder.BindingBuilder<BEAN, ID?> =
     withConverter(EntityToIdConverter(idColumn, ENTITY::class))
